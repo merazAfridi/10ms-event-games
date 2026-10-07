@@ -1,0 +1,82 @@
+{
+  "_help": "Verb Hunt levels. To add a level, copy the whole { ... } block of Level 1, paste it after it (put a comma between the blocks), and change the text. 'answers' has ONE list per sentence, in order: list the verbs of sentence 1, then sentence 2, and so on (use [] for a sentence with no verbs). Write each verb exactly as it appears in the paragraph, without punctuation. If the same word appears twice in one sentence, list it twice to mark both; to mark only the 2nd one, write it as \"word#2\". Sentences are split at . ! and ? - if your paragraph contains abbreviations like 'Mr.' or 'e.g.', replace \"paragraph\" with \"sentences\": [\"First sentence.\", \"Second sentence.\"]. Add ? after a word (\"dressed?\") for an arguable word that may be tapped or skipped without penalty. The verb total (e.g. 37) is counted automatically.",
+
+  "title": "Verb Hunt!",
+  "tagline": "Find every verb hiding in the story.",
+
+  "levels": [
+    {
+      "title": "The School Morning",
+      "difficulty": "Easy",
+      "paragraph": "Every morning, Rafi wakes up before his alarm rings. He opens the window and watches the birds outside. The cool air makes him feel refreshed. He quickly gets dressed and packs his books into his bag. His mother prepares breakfast while he checks his timetable. After eating, he drinks a glass of water. He picks up his bag and walks towards the door. Suddenly, he remembers that he has forgotten his science project. He runs back to his room and searches through his books. Finally, he finds the project under his pillow. He smiles with relief and puts it carefully inside his bag. His mother calls him from the kitchen. Rafi says goodbye and leaves the house. He walks quickly because the school bus is waiting nearby. When he reaches the bus stop, several students are already standing there. The bus arrives a few minutes later. Rafi climbs aboard and finds an empty seat. He sits down and starts reading his English book.",
+      "answers": [
+        ["wakes", "rings"],
+        ["opens", "watches"],
+        ["makes", "feel", "refreshed?"],
+        ["gets", "dressed?", "packs"],
+        ["prepares", "checks"],
+        ["eating", "drinks"],
+        ["picks", "walks"],
+        ["remembers", "has", "forgotten"],
+        ["runs", "searches"],
+        ["finds"],
+        ["smiles", "puts"],
+        ["calls"],
+        ["says", "leaves"],
+        ["walks", "is", "waiting"],
+        ["reaches", "are", "standing"],
+        ["arrives"],
+        ["climbs", "finds"],
+        ["sits", "starts", "reading"]
+      ]
+    },
+    {
+      "title": "The Unexpected Day",
+      "difficulty": "Medium",
+      "paragraph": "Sara was walking home when she noticed something unusual. A small crowd had gathered near the park entrance. Curious, she moved closer to see what was happening. A street performer was entertaining the crowd with a strange-looking machine. He explained how the machine worked and invited someone to try it. A little boy stepped forward and pressed a button. Suddenly, the machine began making a loud noise. Everyone looked surprised, but the performer remained calm. He quickly switched it off and examined the controls. The crowd started laughing when they realized that nothing dangerous had happened. Sara took out her phone and recorded the funny moment. Her friend, who had been watching from a distance, came running toward her. They talked about the machine while walking home. Later that evening, Sara showed the video to her family. Her brother laughed and asked her to send it to him. She promised that she would share it after checking the video. Before going to bed, she watched the recording again and noticed something funny in the background.",
+      "answers": [
+        ["was", "walking", "noticed"],
+        ["had", "gathered"],
+        ["moved", "see", "was", "happening"],
+        ["was", "entertaining"],
+        ["explained", "worked", "invited", "try"],
+        ["stepped", "pressed"],
+        ["began", "making"],
+        ["looked", "surprised?", "remained"],
+        ["switched", "examined"],
+        ["started", "laughing", "realized", "had", "happened"],
+        ["took", "recorded"],
+        ["had", "been", "watching", "came", "running"],
+        ["talked", "walking"],
+        ["showed"],
+        ["laughed", "asked", "send"],
+        ["promised", "would", "share", "checking"],
+        ["going", "watched", "noticed"]
+      ]
+    },
+    {
+      "title": "The Mystery Experiment",
+      "difficulty": "Hard",
+      "paragraph": "When the students entered the laboratory, their teacher had already prepared everything. Several bottles were standing on the table, and a strange smell was coming from one of them. The teacher asked everyone to remain quiet while she explained the experiment. She carefully poured a clear liquid into a glass container and added a few drops of another solution. At first, nothing seemed to happen. Then the liquid suddenly changed colour and started producing bubbles. Some students moved closer because they wanted to see the reaction clearly. One student suggested that the mixture might be heating up. The teacher touched the outside of the container and confirmed that it was becoming warmer. She reminded everyone that they should never touch an unknown chemical directly. Meanwhile, another student was writing down every observation. He noticed that the bubbles were becoming smaller after a few minutes. The teacher explained that the reaction was slowing down. Everyone listened carefully and recorded the results in their notebooks. After the experiment ended, the students discussed what they had observed. They compared their notes and tried to explain why the reaction had changed. Finally, the teacher asked them to write a short report before leaving the laboratory.",
+      "answers": [
+        ["entered", "had", "prepared"],
+        ["were", "standing", "was", "coming"],
+        ["asked", "remain", "explained"],
+        ["poured", "added"],
+        ["seemed", "happen"],
+        ["changed", "started", "producing"],
+        ["moved", "wanted", "see"],
+        ["suggested", "might", "be", "heating"],
+        ["touched", "confirmed", "was", "becoming"],
+        ["reminded", "should", "touch"],
+        ["was", "writing"],
+        ["noticed", "were", "becoming"],
+        ["explained", "was", "slowing"],
+        ["listened", "recorded"],
+        ["ended", "discussed", "had", "observed"],
+        ["compared", "tried", "explain", "had", "changed"],
+        ["asked", "write", "leaving"]
+      ]
+    }
+  ]
+}

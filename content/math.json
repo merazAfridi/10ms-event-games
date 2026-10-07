@@ -1,0 +1,25 @@
+{
+  "_help": "Shape Challenge content. 'shapes' is the order players see. 'sides' is 0 for a circle, otherwise the number of sides of a regular polygon (3 = triangle, 4 = square, 5 = pentagon ...). Timer, pass mark and difficulty live in config.json.",
+
+  "title": "Shape Challenge",
+  "tagline": "Draw. Focus. Master.",
+  "rules": [
+    "Draw each shape with one finger, in one continuous stroke.",
+    "Lift your finger to see your accuracy.",
+    "Score {threshold}% or more to complete a shape.",
+    "Complete {target} shapes before the {time} timer runs out to win a surprise gift!"
+  ],
+  "winTitle": "Challenge Completed!",
+  "winMessage": "Show this screen to collect your surprise gift!",
+  "timeUpTitle": "Time's up!",
+  "timeUpMessage": "So close! Take a breath and try again.",
+
+  "shapes": [
+    { "name": "Circle", "sides": 0 },
+    { "name": "Pentagon", "sides": 5 },
+    { "name": "Hexagon", "sides": 6 },
+    { "name": "Heptagon", "sides": 7 },
+    { "name": "Octagon", "sides": 8 },
+    { "name": "Nonagon", "sides": 9 }
+  ]
+}

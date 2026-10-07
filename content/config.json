@@ -1,0 +1,54 @@
+{
+  "_help": "General settings. Change the values, keep the quotes and commas. See README.md > 'Tuning the Shape Challenge' for advice.",
+
+  "eventName": "কৃতী শিক্ষার্থী সংবর্ধনা",
+  "eventTagline": "Book of Games",
+
+  "math": {
+    "timeLimitSeconds": 120,
+    "shapesToWin": 2,
+    "passThreshold": 85,
+    "strictness": 0.8,
+    "minDrawingSize": 0.3,
+    "showScoreDetails": false,
+    "rewardCodeSecret": "10ms-qkwCu0abyf0j",
+
+    "advancedScoring": {
+      "errorTolerance": 0.25,
+      "vertexNear": 0.12,
+      "vertexFar": 0.32,
+      "closureGap": 0.15,
+      "closurePenalty": 0.8,
+      "cornerWeight": 0.25
+    }
+  },
+
+  "bangla": {
+    "challengesToWin": 4
+  },
+
+  "english": {
+    "passAccuracy": 85,
+    "timeLimitSeconds": 0
+  },
+
+  "science": {
+    "timeLimitSeconds": 120,
+    "challengesToWin": 2,
+    "shuffleChallenges": true
+  },
+
+  "_notes": {
+    "bangla": "কথায় কথায় বাগধারা: challengesToWin = correct answers needed for the gift. Players always answer all challenges; the gift code appears at the end if they reached this number. Gift codes use the same rewardCodeSecret as Math.",
+    "english": "Verb Hunt: players pick one level and complete it. passAccuracy = accuracy (0-100) needed for the gift; accuracy = (correct taps − wrong taps) ÷ verbs in that level. timeLimitSeconds = time for the level (180 = 3:00); 0 = no time limit. Gift codes use the same rewardCodeSecret as Math.",
+    "science": "Science Challenge: timeLimitSeconds = length of a round, challengesToWin = correct answers needed for the gift, shuffleChallenges = true to show the challenges in a random order each game. Gift codes use the same rewardCodeSecret as Math.",
+    "timeLimitSeconds": "Length of the Shape Challenge in seconds (120 = 2:00).",
+    "shapesToWin": "How many shapes must be completed to win.",
+    "passThreshold": "Accuracy (0-100) needed to complete a shape.",
+    "strictness": "Overall difficulty. 1.0 = normal, 1.2 = harder, 0.8 = easier. Try small steps of 0.1.",
+    "minDrawingSize": "Drawings smaller than this fraction of the canvas are rejected with 'Draw it bigger!'.",
+    "showScoreDetails": "true = show the score breakdown (shape / coverage / closure / corners) after every drawing. Useful while tuning; set back to false for the event. You can also add ?debug to the URL.",
+    "rewardCodeSecret": "Any secret word. It makes the reward codes checkable on the #/verify page. Change it before the event and don't share it.",
+    "advancedScoring": "Fine-grained scoring knobs; only change these if strictness alone isn't enough. errorTolerance: average wobble (fraction of the shape's radius) that scores 0%. vertexNear/vertexFar: how close the stroke must pass to each corner. closureGap/closurePenalty: how much an unclosed shape costs. cornerWeight: how much a polygon loses if it has rounded instead of sharp corners."
+  }
+}

@@ -1,0 +1,435 @@
+/** Game 3 – Math: "Shape Challenge" (draw shapes freehand, 85%+ accuracy, 2 shapes in 2 minutes). */
+import { h, html, haptic, icon, formatTime, reducedMotion } from '../lib/util.js';
+import { topBar, button, scoreRing, resultView } from '../lib/ui.js';
+import { scoreShape, polygonVertices } from '../lib/shape-score.js';
+import { showWinScreen } from '../lib/reward.js';
+import { countPlay, countWin } from '../lib/attempts.js';
+
+const RESULT_PAUSE = 1500; // ms the accuracy stays on screen before moving on
+const TIME_UP_GRACE = 4000; // ms a player may finish a stroke that was started before the timer hit 0
+
+const DEFAULTS = {
+  timeLimitSeconds: 120,
+  shapesToWin: 2,
+  passThreshold: 85,
+  strictness: 1,
+  minDrawingSize: 0.3,
+  showScoreDetails: false,
+  rewardCodeSecret: '',
+  advancedScoring: {},
+};
+
+/** Small reference picture of a shape (vertex pointing up, visually centred). */
+export function shapeIcon(sides) {
+  if (!sides) return html('<svg class="shape-icon" viewBox="0 0 100 100" aria-hidden="true"><circle cx="50" cy="50" r="40"/></svg>');
+  const R = 42;
+  const drop = (R - R * Math.cos(Math.PI / sides)) / 2; // centre odd polygons vertically
+  const points = polygonVertices(sides, 50, 50 + drop, R, -Math.PI / 2)
+    .map((p) => `${p.x.toFixed(1)},${p.y.toFixed(1)}`)
+    .join(' ');
+  return html(`<svg class="shape-icon" viewBox="0 0 100 100" aria-hidden="true"><polygon points="${points}"/></svg>`);
+}
+
+
+export function mount(root, ctx) {
+  const data = ctx.content;
+  const cfg = { ...DEFAULTS, ...(ctx.config.math || {}) };
+  const shapes = (data.shapes || []).filter((s) => s && (s.sides === 0 || s.sides >= 3));
+  const need = Math.max(1, Math.min(cfg.shapesToWin, shapes.length));
+  const debug = cfg.showScoreDetails || /[?&]debug\b/.test(location.search + location.hash);
+  const scoring = { ...cfg.advancedScoring, strictness: cfg.strictness };
+  const fill = (text) => String(text)
+    .replace('{threshold}', cfg.passThreshold)
+    .replace('{target}', need)
+    .replace('{time}', formatTime(cfg.timeLimitSeconds));
+
+  // Everything that has to be cleaned up when the player leaves or restarts.
+  let cleanup = [];
+  const later = (fn, ms) => { const id = setTimeout(fn, ms); cleanup.push(() => clearTimeout(id)); return id; };
+  const every = (fn, ms) => { const id = setInterval(fn, ms); cleanup.push(() => clearInterval(id)); return id; };
+  const teardown = () => { cleanup.forEach((fn) => fn()); cleanup = []; };
+
+  intro();
+
+  function intro() {
+    teardown();
+    root.replaceChildren(
+      topBar({ onBack: ctx.goHome }),
+      h('main', { class: 'scroll intro' },
+        h('div', { class: 'intro-hero' },
+          h('p', { class: 'kicker' }, 'Math'),
+          h('h1', { class: 'intro-title display caps' }, data.title || 'Shape Challenge'),
+          h('p', { class: 'intro-sub tagline' }, data.tagline || 'Draw. Focus. Master.'),
+        ),
+        h('div', { class: 'shape-strip' },
+          shapes.map((s) => h('div', { class: 'shape-chip' }, shapeIcon(s.sides), h('span', {}, s.name))),
+        ),
+        h('section', { class: 'card rule-card' },
+          h('h2', { class: 'card-label' }, 'How to play'),
+          h('ol', { class: 'steps' }, (data.rules || []).map((r) => h('li', {}, fill(r)))),
+        ),
+      ),
+      h('footer', { class: 'bottom-bar' }, button(`Start · ${formatTime(cfg.timeLimitSeconds)}`, play, { cls: 'big' })),
+    );
+  }
+
+  function play() {
+    teardown();
+    countPlay('math');
+    const st = {
+      index: 0,
+      completed: new Set(),
+      best: new Map(),
+      deadline: Date.now() + cfg.timeLimitSeconds * 1000,
+      timeOver: false,
+      over: false,
+      busy: null, // 'pass' | 'fail' | 'small' while a result is showing
+    };
+    let points = [];
+    let guide = null;
+    let pointerId = null;
+    let padRect = null;
+    let padSize = 0;
+
+    // ----- DOM -----
+    const timerText = h('span', {}, formatTime(cfg.timeLimitSeconds));
+    const timerChip = h('div', { class: 'chip timer', role: 'timer' }, icon('clock'), timerText);
+    const doneCount = h('strong', {}, '0');
+    const targetIcon = h('div', { class: 'target-icon' });
+    const targetName = h('strong', { class: 'target-name' });
+    const targetMeta = h('span', { class: 'target-meta' });
+    const canvas = h('canvas', { class: 'pad', 'aria-label': 'Drawing area' });
+    const g = canvas.getContext('2d');
+    const hint = h('div', { class: 'pad-hint' }, 'Draw here in one stroke');
+    const popNum = h('strong', { class: 'pop-num' });
+    const popText = h('span', { class: 'pop-text' });
+    const popDetail = h('span', { class: 'pop-detail' });
+    const pop = h('div', { class: 'pop', hidden: true, 'aria-live': 'assertive' }, popNum, popText, popDetail);
+    const padBox = h('div', { class: 'pad-box' }, canvas, hint, pop);
+    const padWrap = h('div', { class: 'pad-wrap' }, padBox);
+    const clearBtn = button('Clear', clear, { kind: 'secondary', iconName: 'eraser' });
+    const skipBtn = button('Skip', skip, { kind: 'secondary', iconName: 'skip' });
+
+    root.replaceChildren(
+      topBar({
+        onBack: ctx.goHome,
+        center: timerChip,
+        right: h('div', { class: 'chip done-chip' }, 'Completed: ', doneCount, ` / ${need}`),
+      }),
+      h('div', { class: 'target' },
+        targetIcon,
+        h('div', { class: 'target-text' }, h('span', { class: 'target-label' }, 'Draw a'), targetName),
+        targetMeta,
+      ),
+      padWrap,
+      h('footer', { class: 'bottom-bar two' }, clearBtn, skipBtn),
+    );
+    showTarget();
+
+    // ----- canvas sizing -----
+    const resize = () => {
+      const cs = getComputedStyle(padWrap);
+      const innerW = padWrap.clientWidth - parseFloat(cs.paddingLeft) - parseFloat(cs.paddingRight);
+      const innerH = padWrap.clientHeight - parseFloat(cs.paddingTop) - parseFloat(cs.paddingBottom);
+      const size = Math.floor(Math.min(innerW, innerH));
+      if (size <= 0 || size === padSize) return;
+      padSize = size;
+      padBox.style.width = `${size}px`;
+      padBox.style.height = `${size}px`;
+      const dpr = Math.min(3, window.devicePixelRatio || 1);
+      canvas.width = Math.round(size * dpr);
+      canvas.height = Math.round(size * dpr);
+      g.setTransform(dpr, 0, 0, dpr, 0, 0);
+      redraw();
+    };
+    const observer = new ResizeObserver(resize);
+    observer.observe(padWrap);
+    cleanup.push(() => observer.disconnect());
+    resize();
+
+    // ----- drawing -----
+    const blockTouch = (e) => e.preventDefault(); // belt and braces for iOS: no scroll / zoom while drawing
+    canvas.addEventListener('touchstart', blockTouch, { passive: false });
+    canvas.addEventListener('touchmove', blockTouch, { passive: false });
+    canvas.addEventListener('pointerdown', onDown);
+    canvas.addEventListener('pointermove', onMove);
+    canvas.addEventListener('pointerup', onUp);
+    canvas.addEventListener('pointercancel', onCancel);
+    canvas.addEventListener('lostpointercapture', (e) => { if (e.pointerId === pointerId) onUp(e); });
+
+    function pos(e) {
+      return { x: e.clientX - padRect.left, y: e.clientY - padRect.top };
+    }
+
+    function onDown(e) {
+      if (st.over || st.busy || pointerId !== null || !e.isPrimary) return;
+      e.preventDefault();
+      pointerId = e.pointerId;
+      try { canvas.setPointerCapture(pointerId); } catch { /* ignore */ }
+      padRect = canvas.getBoundingClientRect();
+      points = [pos(e)];
+      guide = null;
+      hint.hidden = true;
+      pop.hidden = true;
+      redraw();
+    }
+
+    function onMove(e) {
+      if (e.pointerId !== pointerId) return;
+      const events = typeof e.getCoalescedEvents === 'function' ? e.getCoalescedEvents() : [];
+      for (const ev of events.length ? events : [e]) {
+        const p = pos(ev);
+        const last = points[points.length - 1];
+        if (Math.hypot(p.x - last.x, p.y - last.y) < 1) continue;
+        points.push(p);
+        strokeSegment(last, p);
+      }
+    }
+
+    function onUp(e) {
+      if (e.pointerId !== pointerId) return;
+      pointerId = null;
+      finishStroke();
+    }
+
+    function onCancel(e) {
+      if (e.pointerId !== pointerId) return;
+      pointerId = null;
+      resetPad();
+    }
+
+    function strokeSegment(a, b) {
+      g.strokeStyle = '#2b2350';
+      g.lineWidth = 6;
+      g.lineCap = 'round';
+      g.lineJoin = 'round';
+      g.beginPath();
+      g.moveTo(a.x, a.y);
+      g.lineTo(b.x, b.y);
+      g.stroke();
+    }
+
+    function redraw() {
+      g.clearRect(0, 0, padSize, padSize);
+      if (guide) {
+        g.save();
+        g.setLineDash([10, 9]);
+        g.lineWidth = 4;
+        g.strokeStyle = guide.pass ? 'rgba(24,147,90,.85)' : 'rgba(211,63,73,.8)';
+        g.beginPath();
+        const { sides, cx, cy, R, rot } = guide.fit;
+        if (!sides) g.arc(cx, cy, R, 0, Math.PI * 2);
+        else {
+          polygonVertices(sides, cx, cy, R, rot).forEach((v, i) => (i ? g.lineTo(v.x, v.y) : g.moveTo(v.x, v.y)));
+          g.closePath();
+        }
+        g.stroke();
+        g.restore();
+      }
+      if (points.length > 1) {
+        g.strokeStyle = '#2b2350';
+        g.lineWidth = 6;
+        g.lineCap = 'round';
+        g.lineJoin = 'round';
+        g.beginPath();
+        points.forEach((p, i) => (i ? g.lineTo(p.x, p.y) : g.moveTo(p.x, p.y)));
+        g.stroke();
+      }
+    }
+
+    function resetPad() {
+      points = [];
+      guide = null;
+      pop.hidden = true;
+      hint.hidden = false;
+      redraw();
+    }
+
+    function finishStroke() {
+      if (points.length < 3) { resetPad(); return; } // just a tap
+
+      const xs = points.map((p) => p.x);
+      const ys = points.map((p) => p.y);
+      const extent = Math.max(Math.max(...xs) - Math.min(...xs), Math.max(...ys) - Math.min(...ys));
+      const shape = shapes[st.index];
+      const result = extent >= cfg.minDrawingSize * padSize ? scoreShape(points, shape.sides, scoring) : null;
+
+      if (!result) {
+        showPop({ kind: 'small', text: 'Draw it bigger!', detail: 'Use more of the drawing area.' });
+        haptic('wrong');
+        settle('small', 1100);
+        return;
+      }
+
+      const pass = result.score >= cfg.passThreshold;
+      st.best.set(st.index, Math.max(st.best.get(st.index) ?? 0, result.score));
+      guide = { fit: result.fit, pass };
+      redraw();
+      if (pass) {
+        st.completed.add(st.index);
+        doneCount.textContent = String(st.completed.size);
+        haptic('success');
+      } else {
+        haptic('wrong');
+      }
+      showPop({
+        kind: pass ? 'pass' : 'fail',
+        score: result.score,
+        text: pass ? 'Shape Completed!' : 'Try Again',
+        detail: debug
+          ? `shape ${pct(result.shape)} · cover ${pct(result.coverage)} · close ${pct(result.closure)}${shape.sides ? ` · corners ${pct(result.corners)}` : ''}`
+          : pass ? '' : tipFor(result, shape),
+      });
+      settle(pass ? 'pass' : 'fail', RESULT_PAUSE);
+    }
+
+    /** Lock the pad while a result is showing, then move on. */
+    function settle(kind, ms) {
+      st.busy = kind;
+      clearBtn.disabled = kind === 'pass';
+      skipBtn.disabled = kind === 'pass';
+      st.pending = later(() => afterResult(kind), ms);
+    }
+
+    function afterResult(kind) {
+      st.busy = null;
+      clearBtn.disabled = false;
+      skipBtn.disabled = false;
+      if (st.completed.size >= need) return win();
+      if (st.timeOver) return timeUp();
+      if (kind === 'pass') nextShape();
+      else resetPad();
+    }
+
+    function clear() {
+      if (st.busy === 'pass' || st.over) return;
+      if (st.busy) { clearTimeout(st.pending); st.busy = null; }
+      resetPad();
+    }
+
+    function skip() {
+      if (st.busy === 'pass' || st.over) return;
+      if (st.busy) { clearTimeout(st.pending); st.busy = null; }
+      nextShape();
+    }
+
+    function nextShape() {
+      for (let k = 1; k <= shapes.length; k++) {
+        const j = (st.index + k) % shapes.length;
+        if (!st.completed.has(j)) { st.index = j; break; }
+      }
+      resetPad();
+      showTarget();
+    }
+
+    function showTarget() {
+      const s = shapes[st.index];
+      targetIcon.replaceChildren(shapeIcon(s.sides));
+      targetName.textContent = s.name.toUpperCase();
+      targetMeta.textContent = s.sides ? `${s.sides} equal sides` : 'perfectly round';
+      const row = targetIcon.parentElement;
+      row.classList.remove('swap');
+      void row.offsetWidth; // restart the CSS animation
+      row.classList.add('swap');
+    }
+
+    function showPop({ kind, score = null, text, detail }) {
+      pop.className = `pop ${kind}`;
+      pop.hidden = false;
+      popText.textContent = text;
+      popDetail.textContent = detail || '';
+      popDetail.hidden = !detail;
+      popNum.hidden = score === null;
+      if (score === null) return;
+      if (reducedMotion()) { popNum.textContent = `${score}%`; return; }
+      const t0 = performance.now();
+      const tick = (now) => {
+        const t = Math.min(1, (now - t0) / 650);
+        popNum.textContent = `${Math.round(score * (1 - (1 - t) ** 3))}%`;
+        if (t < 1 && !pop.hidden) requestAnimationFrame(tick);
+      };
+      requestAnimationFrame(tick);
+    }
+
+    // ----- timer -----
+    function tickTimer() {
+      if (st.over) return;
+      const msLeft = st.deadline - Date.now();
+      const left = Math.max(0, Math.ceil(msLeft / 1000));
+      timerText.textContent = formatTime(left);
+      timerChip.classList.toggle('low', left <= 20);
+      if (msLeft > 0) return;
+      st.timeOver = true;
+      if (pointerId !== null && msLeft > -TIME_UP_GRACE) return; // let them finish this stroke
+      if (st.busy) return; // afterResult() decides
+      timeUp();
+    }
+    every(tickTimer, 250);
+
+    // ----- endings -----
+    function stopPlay() {
+      st.over = true;
+      pointerId = null;
+      teardown();
+    }
+
+    function win() {
+      stopPlay();
+      haptic('win');
+      showWin([...st.completed].map((i) => ({ name: shapes[i].name, score: st.best.get(i) })),
+        cfg.timeLimitSeconds - Math.max(0, Math.ceil((st.deadline - Date.now()) / 1000)));
+    }
+
+    function timeUp() {
+      stopPlay();
+      haptic('wrong');
+      const attempted = [...st.best.entries()].map(([i, score]) => ({ name: shapes[i].name, score, done: st.completed.has(i) }));
+      root.replaceChildren(
+        topBar({ onBack: ctx.goHome }),
+        resultView({
+          kicker: data.title || 'Shape Challenge',
+          visual: scoreRing(st.completed.size / need, `${st.completed.size}/${need}`, 'shapes'),
+          title: data.timeUpTitle || "Time's up!",
+          message: data.timeUpMessage,
+          extra: attempted.length
+            ? h('ul', { class: 'best-list' }, attempted.map((a) =>
+              h('li', { class: a.done ? 'ok' : '' }, h('span', {}, a.name), h('strong', {}, `best ${a.score}%`))))
+            : h('p', { class: 'muted center' }, 'No shapes were drawn this time.'),
+          actions: [
+            { label: 'Play Again', kind: 'primary', iconName: 'replay', onClick: play },
+            { label: 'Back to Books', kind: 'secondary', iconName: 'books', onClick: ctx.goHome },
+          ],
+        }),
+      );
+    }
+  }
+
+  function showWin(completed, secondsUsed) {
+    showWinScreen(root, {
+      secret: cfg.rewardCodeSecret,
+      device: countWin('math'),
+      labels: {
+        ...(data.winTitle && { title: data.winTitle }),
+        ...(data.winMessage && { message: data.winMessage }),
+      },
+      rows: [
+        ...completed.map((c) => ({ label: c.name, value: `${c.score}%`, ok: true })),
+        { label: 'Time used', value: formatTime(secondsUsed) },
+      ],
+      onPlayAgain: play,
+      onHome: ctx.goHome,
+      track: (fn) => cleanup.push(fn),
+    });
+  }
+
+  return { destroy: teardown };
+}
+
+const pct = (v) => `${Math.round(v * 100)}%`;
+
+function tipFor(result, shape) {
+  if (result.closure < 0.9) return 'Finish where you started to close the shape.';
+  if (result.coverage < 0.9) return shape.sides ? `Draw all ${shape.sides} corners.` : 'Go all the way round.';
+  if (shape.sides && result.corners < 0.6) return 'Make sharper corners and straighter sides.';
+  return shape.sides ? 'Keep every side the same length.' : 'Keep it round and even.';
+}
