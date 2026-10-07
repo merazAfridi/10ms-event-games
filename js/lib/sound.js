@@ -1,17 +1,16 @@
 /**
  * Page-flip sound for the book open / close animation.
  *
- * Phones only allow sound after a touch, so the audio engine is (re)started on every touch.
- * iPhones need a sound played inside that touch to unlock, and mute Web Audio when the
- * silent switch is on unless the page asks for "playback" audio.
+ * Phones only allow sound after a touch, so audio is unlocked on every touch.
+ * iPhones mute Web Audio when the silent switch is on, so there the sound is played through a
+ * plain <audio> element instead (media audio plays in silent mode). Everywhere else Web Audio
+ * is used because it starts with no delay.
  */
 const SRC = 'assets/sounds/page-flip.mp3';
 const VOLUME = 0.7;
+const IOS = /iP(hone|ad|od)/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
 
-let ctx = null;
-let buffer = null;
 let bytes = null;
-let decoding = null;
 let lastPlay = 0;
 let pending = false;
 
@@ -20,14 +19,53 @@ function prefetch() {
   return bytes;
 }
 
+// ---------------------------------------------------------------- iPhone: <audio> element
+
+let el = null;
+let elReady = null;
+
+function element() {
+  // Played from a blob URL: Safari won't play media that comes through the service worker cache.
+  elReady ??= prefetch().then((data) => {
+    if (!data) return null;
+    el = new Audio(URL.createObjectURL(new Blob([data], { type: 'audio/mpeg' })));
+    el.preload = 'auto';
+    return el;
+  });
+  return elReady;
+}
+
+let elUnlocked = false;
+function unlockElement() {
+  if (elUnlocked || !el) { element(); return; }
+  elUnlocked = true;
+  // A muted play inside the touch unlocks later plays that aren't started by a touch
+  // (e.g. the phone's own back button).
+  el.muted = true;
+  el.play().then(() => {
+    if (el.muted) { el.pause(); el.currentTime = 0; el.muted = false; } // not if a real flip took over
+  }).catch(() => { el.muted = false; elUnlocked = false; });
+}
+
+// Called without any await first, so the play() still counts as part of the tap.
+function playElement() {
+  if (!el) { element(); return Promise.resolve(false); }
+  elUnlocked = true;
+  el.muted = false;
+  el.currentTime = 0;
+  return el.play().then(() => true);
+}
+
+// ---------------------------------------------------------------- everyone else: Web Audio
+
+let ctx = null;
+let buffer = null;
+let decoding = null;
+
 function engine() {
   if (ctx) return ctx;
   const AC = window.AudioContext || window.webkitAudioContext;
   if (!AC) return null;
-  try {
-    // iOS 17+: play even when the silent switch is on
-    if (navigator.audioSession) navigator.audioSession.type = 'playback';
-  } catch { /* not supported */ }
   try {
     ctx = new AC();
   } catch {
@@ -44,25 +82,35 @@ function decode() {
   return decoding;
 }
 
-// Runs inside a touch: start or wake the audio engine.
-function unlock() {
+function unlockEngine() {
   const c = engine();
   if (!c) return;
-  if (c.state !== 'running') {
-    c.resume().catch(() => {});
-    try {
-      // iPhone: a (silent) sound started inside the touch unlocks audio output
-      const s = c.createBufferSource();
-      s.buffer = c.createBuffer(1, 1, 22050);
-      s.connect(c.destination);
-      s.start(0);
-    } catch { /* ignore */ }
-  }
+  if (c.state !== 'running') c.resume().catch(() => {});
   decode();
 }
 
+async function playEngine(asked) {
+  const c = engine();
+  if (!c) return false;
+  if (c.state !== 'running') await c.resume();
+  if (!buffer) await decode();
+  // too late now (it would no longer match the page turn) or still not allowed
+  if (!buffer || c.state !== 'running' || performance.now() - asked > 450) return false;
+  const src = c.createBufferSource();
+  const gain = c.createGain();
+  gain.gain.value = VOLUME;
+  src.buffer = buffer;
+  src.connect(gain).connect(c.destination);
+  src.start();
+  return true;
+}
+
+// ---------------------------------------------------------------- public
+
 export function initSound() {
   prefetch();
+  if (IOS) element();
+  const unlock = IOS ? unlockElement : unlockEngine;
   ['touchend', 'pointerdown', 'click', 'keydown'].forEach((e) => document.addEventListener(e, unlock, true));
 }
 
@@ -70,21 +118,10 @@ export function initSound() {
 export async function playFlip() {
   const asked = performance.now();
   if (pending || asked - lastPlay < 800) return;
-  const c = engine();
-  if (!c) return;
   pending = true;
   try {
-    if (c.state !== 'running') await c.resume();
-    if (!buffer) await decode();
-    // too late now (it would no longer match the page turn) or still not allowed
-    if (!buffer || c.state !== 'running' || performance.now() - asked > 450) return;
-    const src = c.createBufferSource();
-    const gain = c.createGain();
-    gain.gain.value = VOLUME;
-    src.buffer = buffer;
-    src.connect(gain).connect(c.destination);
-    src.start();
-    lastPlay = performance.now();
+    // no await before this call: on iPhone play() has to start inside the tap
+    if (await (IOS ? playElement() : playEngine(asked))) lastPlay = performance.now();
   } catch {
     // no sound this time
   } finally {

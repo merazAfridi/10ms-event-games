@@ -45,6 +45,10 @@ async function boot() {
   if (cfg.status === 'fulfilled') config = cfg.value;
   BOOKS.forEach((b, i) => { if (books[i].status === 'fulfilled') content[b.id] = books[i].value; });
 
+  // A fresh visit always starts on the shelf, even if the address still points at a game
+  // (e.g. Safari was closed in the middle of one). The staff page is the exception.
+  if (/^#\/(?!verify\b)[\w-]+/.test(location.hash)) history.replaceState(null, '', `${location.pathname}${location.search}#/`);
+
   renderHome();
   document.body.classList.add('ready');
   window.addEventListener('hashchange', queueRoute);
@@ -156,7 +160,7 @@ function onBookTap(i) {
 }
 
 function goHome() {
-  if (BOOKS.some((b) => b.id === current?.id) && !reducedMotion()) playFlip(); // closing a book
+  if (BOOKS.some((b) => b.id === current?.id) && !reducedMotion() && !quickClose) playFlip(); // closing a book
   if (cameFromHome) {
     cameFromHome = false;
     history.back();
@@ -164,6 +168,25 @@ function goHome() {
     location.replace('#/');
   }
 }
+
+// Leaving the browser (switching apps, locking the phone, closing Safari) ends the game:
+// coming back shows the shelf again. A win screen is kept so the gift code can still be shown.
+let quickClose = false;
+let hiddenAt = 0;
+
+function backToShelf() {
+  if (!current || current.id === 'verify' || gameEl.querySelector('.result.win')) return;
+  quickClose = true; // no close animation or sound for this
+  goHome();
+}
+
+document.addEventListener('visibilitychange', () => {
+  if (document.hidden) { hiddenAt = Date.now(); return; }
+  if (hiddenAt && Date.now() - hiddenAt > 2000) backToShelf();
+  hiddenAt = 0;
+});
+// Safari can restore the page from memory instead of reloading it.
+window.addEventListener('pageshow', (e) => { if (e.persisted) backToShelf(); });
 
 // ---------------------------------------------------------------- routing
 
@@ -174,7 +197,8 @@ async function route() {
 
   if (!wanted) cameFromHome = false;
   if (current?.id === wanted) return;
-  if (current) await closeScreen(!wanted && current.id !== 'verify');
+  if (current) await closeScreen(!wanted && current.id !== 'verify' && !quickClose);
+  quickClose = false;
   if (book) await openBook(book, animateNext === book.id);
   else if (wanted === 'verify') {
     openScreen('verify', 'en', mountVerify);
