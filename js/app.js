@@ -149,12 +149,14 @@ function scrollToBook(i, smooth = true) {
 function onBookTap(i) {
   if (current) return;
   if (i !== activeIndex) { scrollToBook(i); return; } // a peeking book: bring it to the centre first
+  if (!reducedMotion()) playFlip(); // start inside the tap: phones trust sound started by a touch
   animateNext = BOOKS[i].id;
   cameFromHome = true;
   location.hash = `#/${BOOKS[i].id}`;
 }
 
 function goHome() {
+  if (BOOKS.some((b) => b.id === current?.id) && !reducedMotion()) playFlip(); // closing a book
   if (cameFromHome) {
     cameFromHome = false;
     history.back();

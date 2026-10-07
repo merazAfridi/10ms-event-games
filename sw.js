@@ -10,7 +10,7 @@
  * If you add new files (e.g. a new cover image name), add them to PRECACHE.
  * Bump VERSION when you remove or rename files so old copies are cleaned up.
  */
-const VERSION = 'v19';
+const VERSION = 'v20';
 const CACHE = `book-of-games-${VERSION}`;
 
 const PRECACHE = [
