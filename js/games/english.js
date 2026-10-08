@@ -3,6 +3,7 @@ import { h, haptic, icon, formatTime } from '../lib/util.js';
 import { topBar, button, scoreRing, resultView } from '../lib/ui.js';
 import { showWinScreen } from '../lib/reward.js';
 import { countPlay, countWin } from '../lib/attempts.js';
+import { demoPlayer, demoClock } from '../lib/demo.js';
 
 // A word: letters/digits, with optional apostrophe parts (don't, Rafi's) and hyphen parts (well-known).
 const WORD = /[A-Za-z0-9]+(?:['’][A-Za-z]+)*(?:-[A-Za-z0-9]+)*/g;
@@ -89,7 +90,7 @@ export function mount(root, ctx) {
         onclick: () => {
           chosen = level;
           cards.forEach((c, i) => c.setAttribute('aria-pressed', String(levels[i] === chosen)));
-          startBtn.querySelector('span:last-child').textContent = `Start Level ${chosen.number}`;
+          startBtn.querySelector('span:last-child').textContent = single ? 'Start' : `Start Level ${chosen.number}`;
           haptic('tap');
         },
       },
@@ -105,7 +106,8 @@ export function mount(root, ctx) {
         h('span', { class: 'pick', 'aria-hidden': 'true' }, icon('check')),
       ),
     );
-    const startBtn = button(`Start Level ${chosen.number}`, () => start(chosen), { cls: 'big', iconName: 'next' });
+    const single = levels.length === 1; // one story: nothing to pick
+    const startBtn = button(single ? 'Start' : `Start Level ${chosen.number}`, () => start(chosen), { cls: 'big', iconName: 'next' });
     root.replaceChildren(
       topBar({ onBack: ctx.goHome }),
       h('main', { class: 'scroll intro' },
@@ -115,22 +117,17 @@ export function mount(root, ctx) {
           data.tagline && h('p', { class: 'intro-sub' }, data.tagline),
         ),
         h('ul', { class: 'facts' },
-          h('li', {}, h('strong', {}, String(levels.length)), h('span', {}, levels.length === 1 ? 'level' : 'levels')),
-          h('li', {}, h('strong', {}, '1'), h('span', {}, 'to finish')),
+          single
+            ? h('li', {}, h('strong', {}, String(chosen.parsed.total)), h('span', {}, 'verbs'))
+            : h('li', {}, h('strong', {}, String(levels.length)), h('span', {}, 'levels')),
+          single && limit
+            ? h('li', {}, h('strong', {}, formatTime(limit)), h('span', {}, 'minutes'))
+            : h('li', {}, h('strong', {}, '1'), h('span', {}, 'to finish')),
           h('li', {}, h('strong', {}, `${cfg.passAccuracy}%`), h('span', {}, '= gift')),
         ),
-        h('section', { class: 'card rule-card', style: 'margin-top:14px' },
-          h('h2', { class: 'card-label' }, 'How to play'),
-          h('ol', { class: 'steps' },
-            h('li', {}, 'Pick a level. Each one is trickier than the last.'),
-            h('li', {}, 'Read the story and tap every ', h('strong', {}, 'verb'), '. Tap it again to unselect.'),
-            h('li', {}, 'Press ', h('strong', {}, 'Check'), ' when you are done.'),
-            h('li', {}, 'Wrong taps lower your accuracy. Reach ', h('strong', {}, `${cfg.passAccuracy}%`), ' to win a surprise gift!'),
-            limit > 0 && h('li', {}, 'You have ', h('strong', {}, formatTime(limit)), ' minutes.'),
-          ),
-        ),
-        h('h2', { class: 'section-title' }, 'Choose a level'),
-        h('div', { class: 'level-list', role: 'group', 'aria-label': 'Choose a level' }, cards),
+        demo(),
+        !single && h('h2', { class: 'section-title' }, 'Choose a level'),
+        !single && h('div', { class: 'level-list', role: 'group', 'aria-label': 'Choose a level' }, cards),
       ),
       h('footer', { class: 'bottom-bar' }, startBtn),
     );
@@ -178,7 +175,7 @@ export function mount(root, ctx) {
     );
 
     const main = h('main', { class: 'scroll hunt' },
-      h('p', { class: 'level-heading' }, `Level ${level.number} of ${levels.length} · `, h('strong', {}, level.title || '')),
+      h('p', { class: 'level-heading' }, levels.length > 1 && `Level ${level.number} of ${levels.length} · `, h('strong', {}, level.title || '')),
       problems.length > 0 && h('div', { class: 'warn-card' },
         h('strong', {}, 'Answer key problem – please fix content/english.json:'),
         h('ul', {}, problems.map((p) => h('li', {}, p))),
@@ -294,7 +291,7 @@ export function mount(root, ctx) {
         secret,
         device: countWin('english'),
         labels: { title: data.winTitle || 'Verb Hunt Complete!' },
-        rows: [...rows, { label: 'Accuracy', value: pct(ratio), ok: true }, { label: 'Time', value: formatTime(seconds) }],
+        rows: [...(levels.length > 1 ? rows : []), { label: 'Accuracy', value: pct(ratio), ok: true }, { label: 'Time', value: formatTime(seconds) }], // one story: its score is the accuracy
         onPlayAgain: intro,
         onHome: ctx.goHome,
         track,
@@ -302,7 +299,7 @@ export function mount(root, ctx) {
       return;
     }
 
-    haptic('wrong');
+    haptic('lose');
     root.replaceChildren(
       topBar({ onBack: ctx.goHome }),
       resultView({
@@ -324,6 +321,48 @@ export function mount(root, ctx) {
 
   function stat(kind, value, label) {
     return h('div', { class: `stat ${kind}` }, h('strong', {}, String(value)), h('span', {}, label));
+  }
+
+  /** Start-screen demo on a sample story: tap verbs (one wrong tap), press Check, see the colours. */
+  function demo() {
+    const story = [['Mina', 0], ['opens', 1], ['the', 0], ['door', 0], ['and', 0], ['sees', 1], ['a', 0], ['small', 0], ['cat.', 0], ['The', 0], ['cat', 0], ['jumps', 1], ['on', 0], ['the', 0], ['bed.', 0]];
+    return demoPlayer({
+      label: 'Demo: how to play',
+      lang: 'en',
+      script: async (screen, api) => {
+        const found = h('b', {}, '0');
+        const words = story.map(([w]) => h('span', { class: 'dm-w' }, w));
+        const check = h('div', { class: 'dm-btn' }, '✓ Check');
+        screen.replaceChildren(
+          h('div', { class: 'dm-bar' }, h('span'), h('span', { class: 'dm-chip' }, 'Verbs found: ', found, ' / 3'), limit ? demoClock(formatTime, limit) : h('span')),
+          h('p', { class: 'dm-para' }, words.flatMap((w, i) => (i ? [' ', w] : [w]))),
+          check,
+        );
+        await api.wait(700);
+        let n = 0;
+        for (const i of [1, 5, 7]) { // two verbs and one wrong word ("small"); "jumps" gets missed
+          await api.tap(words[i]);
+          words[i].classList.add('sel');
+          found.textContent = String(++n);
+          await api.wait(250);
+        }
+        await api.tap(check);
+        api.hide();
+        story.forEach(([, verb], i) => {
+          const picked = words[i].classList.contains('sel');
+          if (verb && picked) words[i].classList.add('ok');
+          else if (picked) words[i].classList.add('bad');
+          else if (verb) words[i].classList.add('miss');
+        });
+        screen.append(h('div', { class: 'dm-legend' }, h('span', { class: 'ok' }, 'Correct'), h('span', { class: 'bad' }, 'Wrong'), h('span', { class: 'miss' }, 'Missed')));
+        await api.wait(2400);
+        screen.replaceChildren(h('div', { class: 'dm-end' },
+          h('strong', {}, 'Tap every verb, then press Check'),
+          h('span', {}, `Reach ${cfg.passAccuracy}% to win a gift! 🎁`),
+        ));
+        await api.wait(2400);
+      },
+    });
   }
 
   return { destroy: teardown };

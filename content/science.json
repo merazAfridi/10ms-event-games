@@ -1,12 +1,12 @@
 {
-  "_help": "Science Challenge content. Each challenge needs: title (the question, shown above the picture), image (path of the picture, e.g. assets/science/q1.jpg), options (4 choices), answer (must be written exactly like one of the options) and why (shown only after a correct answer). situation and question are optional extra text. Use \\n inside text for a line break. Challenge order and option order are shuffled every game. Timer and how many correct answers win are in config.json > science.",
+  "_help": "Science Challenge content. Each challenge needs: title (the question, shown above the picture), image (path of the picture, e.g. assets/science/q1.jpg), options (4 choices), answer (must be written exactly like one of the options) and why (shown only after a correct answer). situation, question and caption (a line under the picture, like চিত্র: চাঁদ) are optional. Use \\n inside text for a line break. Challenge order and option order are shuffled every game. Timer and how many correct answers win are in config.json > science.",
   "title": "Science Challenge",
   "subtitle": "যা সবচেয়ে সহজ মনে হয়, তা-ই কি বৈজ্ঞানিকভাবে সঠিক?",
   "rules": [
     "সময় মাত্র {time} মিনিট।",
     "ছবিটি ভালো করে দেখো, তারপর সবচেয়ে বৈজ্ঞানিক উত্তরটি বেছে নাও। সাবধান — সবচেয়ে সহজ উত্তরটি সবসময় সঠিক নয়!",
     "সঠিক উত্তরে দেখবে পেছনের বিজ্ঞান, আর ভুল উত্তরে... Science Fail!",
-    "কমপক্ষে {target}টি চ্যালেঞ্জ সঠিক হলেই জিতবে সারপ্রাইজ পুরস্কার!"
+    "সবগুলো চ্যালেঞ্জের উত্তর দাও। কমপক্ষে {target}টি সঠিক হলে জিতবে সারপ্রাইজ পুরস্কার!"
   ],
   "challenges": [
     {
@@ -68,6 +68,79 @@
       ],
       "answer": "মাঠের মানুষ",
       "why": "গাছের নিচে বজ্রপাতের ঝুঁকি বেশি। তবে নিরাপদ আশ্রয় হলো ভবন বা গাড়ি।"
+    },
+    {
+      "title": "কোনটার ওজন বেশি?",
+      "image": "assets/science/q6.jpg",
+      "options": [
+        "লোহার বল",
+        "তুলা",
+        "দুটোরই সমান",
+        "চাঁদে কোনোটারই ওজন নেই"
+      ],
+      "answer": "দুটোরই সমান",
+      "why": "চাঁদে ১ কেজি আয়রন বল ও ১ কেজি তুলা দুটোর ভরই ১ কেজি, তাই চাঁদের মাধ্যাকর্ষণ দুটির ওপরই একই অনুপাতে কাজ করবে। তবে পৃথিবীর তুলনায় দুটির ওজনই কম হবে।"
+    },
+    {
+      "title": "কোনটিতে চিনি দ্রুত গলে?",
+      "image": "assets/science/q7b.jpg",
+      "options": [
+        "গরম পানিতে",
+        "ঠান্ডা পানিতে",
+        "দুটিতেই সমান দ্রুত",
+        "কোনোটিতেই গলবে না"
+      ],
+      "answer": "গরম পানিতে",
+      "why": "গরম পানির অণুগুলো বেশি দ্রুত চলাচল করে। ফলে পানির অণু ও চিনির কণার মধ্যে সংঘর্ষ বেশি হয় এবং চিনি তুলনামূলক দ্রুত দ্রবীভূত হয়।"
+    },
+    {
+      "title": "কোনটি বেশি গরম হবে?",
+      "image": "assets/science/q8.jpg",
+      "options": [
+        "কালো টি-শার্ট",
+        "সাদা টি-শার্ট",
+        "দুটিই সমান গরম হবে",
+        "কোনোটিই গরম হবে না"
+      ],
+      "answer": "কালো টি-শার্ট",
+      "why": "কালো রং সূর্যের আলো থেকে বেশি শক্তি শোষণ করে, আর সাদা রং তুলনামূলক বেশি আলো প্রতিফলিত করে। তাই একই পরিবেশে কালো কাপড় সাধারণত বেশি গরম হয়।"
+    },
+    {
+      "title": "আগে পড়বে কে?",
+      "image": "assets/science/q9.jpg",
+      "caption": "চিত্র: চাঁদ",
+      "options": [
+        "পাথর",
+        "পালক",
+        "দুটিই একসঙ্গে",
+        "কোনোটিই নিচে পড়বে না"
+      ],
+      "answer": "দুটিই একসঙ্গে",
+      "why": "চাঁদের প্রায় কোনো বায়ুমণ্ডল নেই, তাই বাতাসের বাধা নেই। ফলে একই উচ্চতা থেকে ফেললে পালক ও পাথর একই ত্বরণে নিচে পড়বে।"
+    },
+    {
+      "title": "পৃথিবী হঠাৎ ঘোরা বন্ধ করলে তুমি কোথায় যাবে?",
+      "image": "assets/science/q10.jpg",
+      "options": [
+        "পূর্ব দিকে ছিটকে যাবে",
+        "পশ্চিম দিকে ছিটকে যাবে",
+        "যেখানে আছ সেখানেই থাকবে",
+        "সোজা মহাকাশে উড়ে যাবে"
+      ],
+      "answer": "পূর্ব দিকে ছিটকে যাবে",
+      "why": "পৃথিবীর সঙ্গে আমরা নিজেও পূর্বদিকে ঘুরছি। পৃথিবী হঠাৎ থেমে গেলেও আমাদের জড়তার কারণে আগের গতির দিকে, অর্থাৎ পূর্বদিকে, চলতে থাকবে।"
+    },
+    {
+      "title": "বরফ গলে গেলে পানির উচ্চতা কী হবে?",
+      "image": "assets/science/q11.jpg",
+      "options": [
+        "বাড়বে",
+        "কমবে",
+        "একই থাকবে",
+        "গ্লাস উপচে পানি পড়ে যাবে"
+      ],
+      "answer": "একই থাকবে",
+      "why": "ভাসমান বরফ যতটুকু পানি সরিয়ে রাখে, বরফ গলে ঠিক ততটুকু পানিতে পরিণত হয়। তাই বরফ পুরো গলে গেলেও পানির স্তর পরিবর্তন হবে না।"
     }
   ]
 }

@@ -3,10 +3,19 @@
 
   "eventName": "কৃতী শিক্ষার্থী সংবর্ধনা",
   "eventTagline": "Book of Games",
+  "pageTitle": "কৃতী শিক্ষার্থী Masterbook Game",
+
+  "sound": {
+    "music": true,
+    "effects": true,
+    "musicVolume": 1,
+    "effectsVolume": 1
+  },
 
   "math": {
     "timeLimitSeconds": 120,
     "shapesToWin": 2,
+    "maxTries": 10,
     "passThreshold": 85,
     "strictness": 0.8,
     "minDrawingSize": 0.3,
@@ -24,26 +33,32 @@
   },
 
   "bangla": {
-    "challengesToWin": 4
+    "challengesToWin": 5,
+    "timeLimitSeconds": 120,
+    "challengesPerGame": 8,
+    "shuffleChallenges": true
   },
 
   "english": {
     "passAccuracy": 85,
-    "timeLimitSeconds": 0
+    "timeLimitSeconds": 120
   },
 
   "science": {
     "timeLimitSeconds": 120,
-    "challengesToWin": 2,
+    "challengesToWin": 5,
+    "challengesPerGame": 8,
     "shuffleChallenges": true
   },
 
   "_notes": {
-    "bangla": "কথায় কথায় বাগধারা: challengesToWin = correct answers needed for the gift. Players always answer all challenges; the gift code appears at the end if they reached this number. Gift codes use the same rewardCodeSecret as Math.",
+    "bangla": "বাংলা চ্যালেঞ্জ: challengesToWin = correct answers needed for the gift. timeLimitSeconds = time for the whole game (120 = 2:00; 0 = no time limit). challengesPerGame = how many questions one game shows, picked at random from content/bangla.json (0 = all of them). shuffleChallenges = true to show them in a random order. Players answer all challenges; the gift code appears at the end if they reached this number (or when time runs out, if they already have it). Gift codes use the same rewardCodeSecret as Math.",
     "english": "Verb Hunt: players pick one level and complete it. passAccuracy = accuracy (0-100) needed for the gift; accuracy = (correct taps − wrong taps) ÷ verbs in that level. timeLimitSeconds = time for the level (180 = 3:00); 0 = no time limit. Gift codes use the same rewardCodeSecret as Math.",
-    "science": "Science Challenge: timeLimitSeconds = length of a round, challengesToWin = correct answers needed for the gift, shuffleChallenges = true to show the challenges in a random order each game. Gift codes use the same rewardCodeSecret as Math.",
+    "science": "Science Challenge: timeLimitSeconds = length of a round, challengesToWin = correct answers needed for the gift (players answer every challenge, the result comes at the end), challengesPerGame = how many challenges one game shows, picked at random from content/science.json (0 = all of them), shuffleChallenges = true to show the challenges in a random order each game. Gift codes use the same rewardCodeSecret as Math.",
+    "sound": "music = background chiptune while a game is open, effects = sounds for right / wrong answers, win and game over. true = on, false = off. Volumes: 1 = normal (already very loud), 0.5 = half, 0 = silent; up to 2 for even louder.",
     "timeLimitSeconds": "Length of the Shape Challenge in seconds (120 = 2:00).",
     "shapesToWin": "How many shapes must be completed to win.",
+    "maxTries": "How many drawings a player gets per game (every finished drawing counts, even a failed one). 0 = no limit.",
     "passThreshold": "Accuracy (0-100) needed to complete a shape.",
     "strictness": "Overall difficulty. 1.0 = normal, 1.2 = harder, 0.8 = easier. Try small steps of 0.1.",
     "minDrawingSize": "Drawings smaller than this fraction of the canvas are rejected with 'Draw it bigger!'.",

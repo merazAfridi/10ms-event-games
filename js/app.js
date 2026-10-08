@@ -7,16 +7,17 @@ import { h, loadJSON, reducedMotion, done } from './lib/util.js';
 import { topBar, button } from './lib/ui.js';
 import { verifyRewardCode } from './lib/reward-code.js';
 import { initSound, playFlip } from './lib/sound.js';
+import { setSoundOptions, startMusic, stopMusic } from './lib/arcade.js';
 import * as bangla from './games/bangla.js';
 import * as english from './games/english.js';
 import * as math from './games/math.js';
 import * as science from './games/science.js';
 
 const BOOKS = [
-  { id: 'bangla', title: 'বাংলা', lang: 'bn', module: bangla, src: 'content/bangla.json', cover: 'assets/covers/bangla.jpg' },
-  { id: 'english', title: 'English', lang: 'en', module: english, src: 'content/english.json', cover: 'assets/covers/english.jpg' },
-  { id: 'math', title: 'Math', lang: 'en', module: math, src: 'content/math.json', cover: 'assets/covers/math.jpg' },
-  { id: 'science', title: 'Science', lang: 'bn', module: science, src: 'content/science.json', cover: 'assets/covers/science.jpg' },
+  { id: 'bangla', title: 'বাংলা', lang: 'bn', level: 'Easy', module: bangla, src: 'content/bangla.json', cover: 'assets/covers/bangla.jpg' },
+  { id: 'english', title: 'English', lang: 'en', level: 'Hard', module: english, src: 'content/english.json', cover: 'assets/covers/english.jpg' },
+  { id: 'math', title: 'Math', lang: 'en', level: 'Hard', module: math, src: 'content/math.json', cover: 'assets/covers/math.jpg' },
+  { id: 'science', title: 'Science', lang: 'bn', level: 'Easy', module: science, src: 'content/science.json', cover: 'assets/covers/science.jpg' },
 ];
 
 const app = document.getElementById('app');
@@ -58,6 +59,7 @@ async function boot() {
     ...BOOKS.map((b) => loadJSON(b.src)),
   ]);
   if (cfg.status === 'fulfilled') config = cfg.value;
+  setSoundOptions(config.sound);
   BOOKS.forEach((b, i) => { if (books[i].status === 'fulfilled') content[b.id] = books[i].value; });
 
   // A fresh visit always starts on the shelf, even if the address still points at a game
@@ -78,7 +80,7 @@ function queueRoute() {
 // ---------------------------------------------------------------- home
 
 function renderHome() {
-  document.title = `${config.eventName || 'EVENT NAME'} · ${config.eventTagline || 'Book of Games'}`;
+  document.title = config.pageTitle || `${config.eventName || 'EVENT NAME'} · ${config.eventTagline || 'Book of Games'}`;
   slots = BOOKS.map((book, i) =>
     h('div', { class: 'book-slot', role: 'listitem' },
       h('button', {
@@ -102,6 +104,7 @@ function renderHome() {
       h('div', { class: 'book-label', 'aria-hidden': 'true' },
         h('strong', { lang: book.lang }, book.title),
         h('span', { lang: book.lang }, gameName(book)),
+        book.level && h('span', { class: `book-level ${book.level.toLowerCase()}`, lang: 'en' }, book.level),
       ),
     ),
   );
@@ -198,6 +201,7 @@ async function openBook(book, animate) {
     ? (root) => book.module.mount(root, { content: content[book.id], config, goHome })
     : (root) => mountError(root, book.id);
   openScreen(book.id, book.lang, mountFn);
+  startMusic(); // background music while a game is open
   if (animate && !reducedMotion()) await playOpen(book);
   else showGameLayer(true);
 }
@@ -206,6 +210,7 @@ async function closeScreen(animate) {
   const book = BOOKS.find((b) => b.id === current.id);
   if (animate && book && !reducedMotion()) await playClose(book);
   try { current.instance?.destroy?.(); } catch (err) { console.error(err); }
+  stopMusic();
   current = null;
   showGameLayer(false);
   gameEl.replaceChildren();

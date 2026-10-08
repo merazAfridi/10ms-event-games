@@ -3,6 +3,7 @@ import { h, html, toBn, shuffle, haptic, icon, formatTime, reducedMotion } from 
 import { topBar, button, scoreRing, resultView } from '../lib/ui.js';
 import { showWinScreen } from '../lib/reward.js';
 import { countPlay, countWin } from '../lib/attempts.js';
+import { demoPlayer, demoClock } from '../lib/demo.js';
 
 const LETTERS = ['ক', 'খ', 'গ', 'ঘ', 'ঙ', 'চ'];
 const BACK_LABEL = 'বইয়ের তাকে ফিরে যাও';
@@ -17,7 +18,7 @@ const FAIL_LINES = [
   'ল্যাব কোট পুড়ে কালো হয়ে গেল!',
 ];
 
-const DEFAULTS = { timeLimitSeconds: 120, challengesToWin: 2, shuffleChallenges: true };
+const DEFAULTS = { timeLimitSeconds: 120, challengesToWin: 5, challengesPerGame: 0, shuffleChallenges: true };
 
 const clean = (text) => String(text ?? '').replace(/\s+/g, ' ').trim();
 const bnTime = (seconds) => toBn(formatTime(seconds));
@@ -37,8 +38,8 @@ export function mount(root, ctx) {
   const cfg = { ...DEFAULTS, ...(ctx.config.science || {}) };
   const secret = ctx.config.math?.rewardCodeSecret || ctx.config.rewardCodeSecret || '';
   const all = (data.challenges || []).filter((c) => c && c.answer);
-  const need = Math.max(1, Math.min(cfg.challengesToWin, all.length));
-  const fill = (text) => String(text).replace('{time}', bnTime(cfg.timeLimitSeconds)).replace('{target}', toBn(need));
+  const perGame = cfg.challengesPerGame > 0 ? Math.min(cfg.challengesPerGame, all.length) : all.length; // 0 = all of them
+  const need = Math.max(1, Math.min(cfg.challengesToWin, perGame));
   all.forEach((c) => { if (c.image) new Image().src = c.image; }); // pictures are ready before the timer starts
 
   let cleanup = [];
@@ -59,13 +60,10 @@ export function mount(root, ctx) {
         ),
         h('ul', { class: 'facts' },
           h('li', {}, h('strong', {}, bnTime(cfg.timeLimitSeconds)), h('span', {}, 'মিনিট')),
-          h('li', {}, h('strong', {}, `${toBn(all.length)}টি`), h('span', {}, 'চ্যালেঞ্জ')),
+          h('li', {}, h('strong', {}, `${toBn(perGame)}টি`), h('span', {}, 'চ্যালেঞ্জ')),
           h('li', {}, h('strong', {}, `${toBn(need)}টি`), h('span', {}, 'সঠিক = পুরস্কার')),
         ),
-        h('section', { class: 'card rule-card', style: 'margin-top:14px' },
-          h('h2', { class: 'card-label' }, 'খেলার নিয়ম'),
-          h('ol', { class: 'steps' }, (data.rules || []).map((r) => h('li', {}, fill(r)))),
-        ),
+        demo(),
       ),
       h('footer', { class: 'bottom-bar' }, button('শুরু করো', play, { cls: 'big' })),
     );
@@ -73,13 +71,13 @@ export function mount(root, ctx) {
 
   function play() {
     teardown();
-    const order = cfg.shuffleChallenges ? shuffle(all) : all.slice();
+    const order = (cfg.shuffleChallenges ? shuffle(all) : all.slice()).slice(0, perGame);
     countPlay('science');
-    const st = { i: 0, correct: 0, results: [], deadline: Date.now() + cfg.timeLimitSeconds * 1000, over: false, won: false };
+    const st = { i: 0, correct: 0, results: [], deadline: Date.now() + cfg.timeLimitSeconds * 1000, over: false, finished: false };
 
     const timerText = h('span', {}, bnTime(cfg.timeLimitSeconds));
     const timerChip = h('div', { class: 'chip timer', role: 'timer' }, icon('clock'), timerText);
-    const correctCount = h('strong', {}, toBn(0));
+    const questionNo = h('strong', {}, `${toBn(1)}/${toBn(order.length)}`); // correct answers are only revealed at the end
     const bar = h('div', { class: 'progress-fill', style: 'width:0%' });
     const main = h('main', { class: `scroll quiz${all.some((c) => c.image) ? ' picture-quiz' : ''}` });
     const footer = h('footer', { class: 'bottom-bar', hidden: true });
@@ -88,8 +86,8 @@ export function mount(root, ctx) {
       topBar({
         onBack: ctx.goHome,
         backLabel: BACK_LABEL,
-        center: timerChip,
-        right: h('div', { class: 'chip' }, 'সঠিক ', correctCount, ` / ${toBn(need)}`),
+        center: h('div', { class: 'chip' }, 'প্রশ্ন ', questionNo),
+        right: timerChip,
       }),
       h('div', { class: 'progress', 'aria-hidden': 'true' }, bar),
       main,
@@ -101,12 +99,12 @@ export function mount(root, ctx) {
     show();
 
     function tick() {
-      if (st.over || st.won) return;
+      if (st.over || st.finished) return;
       const ms = st.deadline - Date.now();
       const left = Math.max(0, Math.ceil(ms / 1000));
       timerText.textContent = bnTime(left);
       timerChip.classList.toggle('low', left <= 20);
-      if (ms <= 0) end('time');
+      if (ms <= 0) { if (st.correct >= need) win(); else end('time'); }
     }
 
     function show() {
@@ -114,6 +112,7 @@ export function mount(root, ctx) {
       const answer = clean(c.answer);
       const options = shuffle([...new Set([answer, ...(c.options || []).map(clean)])]);
       let answered = false;
+      questionNo.textContent = `${toBn(st.i + 1)}/${toBn(order.length)}`;
       bar.style.width = `${(st.i / order.length) * 100}%`;
 
       const feedback = h('section', { class: 'feedback', hidden: true, 'aria-live': 'polite' });
@@ -128,9 +127,9 @@ export function mount(root, ctx) {
       // Two blocks, side by side.
       main.replaceChildren(
         h('div', { class: 'quiz-ask' },
-          h('p', { class: 'kicker' }, `চ্যালেঞ্জ ${toBn(st.i + 1)}/${toBn(order.length)}`),
           h('h1', { class: 'q-title' }, c.title),
           c.image && h('img', { class: 'q-image', src: c.image, alt: '', draggable: 'false' }),
+          c.caption && h('p', { class: 'q-caption' }, c.caption),
           c.situation && h('section', { class: 'card situation' },
             h('h2', { class: 'card-label' }, 'পরিস্থিতি'),
             h('p', { class: 'pre' }, c.situation),
@@ -153,12 +152,16 @@ export function mount(root, ctx) {
         answered = true;
         const ok = text === answer;
         st.results.push({ title: c.title, ok });
+        if (st.i + 1 >= order.length) st.finished = true; // last answer freezes the timer
         bar.style.width = `${((st.i + 1) / order.length) * 100}%`;
         for (const b of buttons) {
           b.disabled = true;
           if (b === chosen) {
             b.classList.add(ok ? 'is-correct' : 'is-wrong');
             b.querySelector('.opt-mark').append(icon(ok ? 'check' : 'cross'));
+          } else if (b.dataset.value === answer) { // after a wrong pick, show the right answer too
+            b.classList.add('is-correct');
+            b.querySelector('.opt-mark').append(icon('check'));
           } else {
             b.classList.add('is-dim');
           }
@@ -166,8 +169,6 @@ export function mount(root, ctx) {
 
         if (ok) {
           st.correct += 1;
-          correctCount.textContent = toBn(st.correct);
-          if (st.correct >= need) st.won = true; // freezes the timer
           haptic('correct');
           feedback.className = 'feedback good';
           feedback.replaceChildren(
@@ -183,7 +184,8 @@ export function mount(root, ctx) {
           feedback.className = 'feedback bad';
           feedback.replaceChildren(
             h('p', { class: 'fb-verdict' }, icon('cross'), 'Science Fail!'),
-            h('p', { class: 'fb-meaning' }, 'এই উত্তরটি বৈজ্ঞানিকভাবে ঠিক নয়। পরের চ্যালেঞ্জে আবার চেষ্টা করো!'),
+            h('p', { class: 'fb-answer-line' }, 'সঠিক উত্তর: ', h('strong', {}, answer)),
+            c.why && h('p', { class: 'fb-meaning pre' }, h('strong', {}, 'কেন? '), c.why),
           );
           scienceFail(() => {
             if (st.over) return;
@@ -197,17 +199,17 @@ export function mount(root, ctx) {
 
     function showNext() {
       const last = st.i + 1 >= order.length;
-      const label = st.won ? 'পুরস্কার দেখো' : last ? 'ফলাফল দেখো' : 'পরবর্তী';
+      const label = !last ? 'পরবর্তী' : st.correct >= need ? 'পুরস্কার দেখো' : 'ফলাফল দেখো';
       footer.replaceChildren(button(label, next, { cls: 'big', iconName: 'next' }));
       footer.hidden = false;
     }
 
     function next() {
       if (st.over) return;
-      if (st.won) { win(); return; }
       st.i += 1;
-      if (st.i >= order.length) end('done');
-      else show();
+      if (st.i < order.length) show();
+      else if (st.correct >= need) win();
+      else end('done');
     }
 
     /** Humorous full-screen "Science Fail" moment. Calls `after` when it closes (or is tapped away). */
@@ -239,7 +241,6 @@ export function mount(root, ctx) {
       st.over = true;
       teardown();
       haptic('win');
-      const used = cfg.timeLimitSeconds - Math.max(0, Math.ceil((st.deadline - Date.now()) / 1000));
       showWinScreen(root, {
         secret,
         device: countWin('science'),
@@ -258,10 +259,6 @@ export function mount(root, ctx) {
           home: 'বইয়ে ফিরে যাও',
           back: BACK_LABEL,
         },
-        rows: [
-          ...st.results.filter((r) => r.ok).map((r) => ({ label: r.title, value: '✓', ok: true })),
-          { label: 'সময় লেগেছে', value: bnTime(used) },
-        ],
         onPlayAgain: play,
         onHome: ctx.goHome,
         track,
@@ -271,21 +268,14 @@ export function mount(root, ctx) {
     function end(reason) {
       st.over = true;
       teardown();
-      haptic('wrong');
+      haptic('lose');
       root.replaceChildren(
         topBar({ onBack: ctx.goHome, backLabel: BACK_LABEL }),
         resultView({
           kicker: data.title || 'Science Challenge',
-          visual: scoreRing(st.correct / need, `${toBn(st.correct)}/${toBn(need)}`, 'সঠিক'),
+          visual: scoreRing(st.correct / order.length, `${toBn(st.correct)}/${toBn(order.length)}`, 'সঠিক'),
           title: reason === 'time' ? 'সময় শেষ!' : 'খেলা শেষ!',
-          message: `পুরস্কারের জন্য দরকার ${toBn(need)}টি সঠিক উত্তর। আরেকবার চেষ্টা করো!`,
-          extra: st.results.length
-            ? h('ol', { class: 'review' }, st.results.map((r, i) =>
-              h('li', { class: r.ok ? 'ok' : 'bad' },
-                h('span', { class: 'rv-mark' }, icon(r.ok ? 'check' : 'cross')),
-                h('div', {}, h('p', { class: 'rv-answer' }, `${toBn(i + 1)}. ${r.title}`)),
-              )))
-            : h('p', { class: 'muted center' }, 'এবার কোনো উত্তর দেওয়া হয়নি।'),
+          message: `পুরস্কারের জন্য দরকার কমপক্ষে ${toBn(need)}টি সঠিক উত্তর। আরেকবার চেষ্টা করো!`,
           actions: [
             { label: 'আবার খেলো', kind: 'primary', iconName: 'replay', onClick: play },
             { label: 'বইয়ে ফিরে যাও', kind: 'secondary', iconName: 'books', onClick: ctx.goHome },
@@ -293,6 +283,54 @@ export function mount(root, ctx) {
         }),
       );
     }
+  }
+
+  /** Start-screen demo: a sample picture question answered wrong, then right, then the win rule. */
+  function demo() {
+    // Sample picture (not one of the real questions): wood floating, a stone on the bottom.
+    const picture = () => html(`<svg class="dm-pic" viewBox="0 0 320 210" aria-hidden="true">
+      <rect width="320" height="210" rx="14" fill="#fdf3dc"/>
+      <rect x="40" y="70" width="240" height="120" rx="8" fill="#a5d8ff" stroke="#4dabf7" stroke-width="5"/>
+      <path d="M43 92q30-10 58 0t58 0 58 0 58 0" fill="none" stroke="#e7f5ff" stroke-width="5"/>
+      <rect x="70" y="72" width="80" height="34" rx="6" fill="#c0803c" stroke="#7c4a1e" stroke-width="4"/>
+      <ellipse cx="220" cy="168" rx="38" ry="22" fill="#868e96" stroke="#495057" stroke-width="4"/>
+      <text x="110" y="40" font-size="22" font-weight="700" text-anchor="middle" fill="#7c4a1e">কাঠ</text>
+      <text x="220" y="40" font-size="22" font-weight="700" text-anchor="middle" fill="#495057">পাথর</text>
+    </svg>`);
+    const opt = (letter, text) => h('div', { class: 'dm-opt' }, h('b', {}, letter), text);
+    const round = async (screen, api, n, question, options, pick, right) => {
+      const opts = options.map((t, i) => opt(LETTERS[i], t));
+      screen.replaceChildren(
+        h('div', { class: 'dm-bar' }, h('span'), h('span', { class: 'dm-chip' }, `প্রশ্ন ${toBn(n)}/${toBn(perGame)}`), demoClock(bnTime, cfg.timeLimitSeconds - (n - 1) * 9)),
+        h('div', { class: 'dm-split' }, h('div', {}, h('p', { class: 'dm-q small' }, question), picture()), h('div', { class: 'dm-opts' }, opts)),
+      );
+      await api.wait(700);
+      await api.tap(opts[pick]);
+      opts.forEach((o, i) => o.classList.add(i === pick ? (i === right ? 'ok' : 'bad') : 'dim'));
+      await api.wait(400);
+      api.hide();
+      const p = pick === right
+        ? h('div', { class: 'dm-pop yes' }, h('strong', {}, 'সঠিক! দারুণ বৈজ্ঞানিক চিন্তা!'))
+        : h('div', { class: 'dm-pop fail' }, h('span', { class: 'dm-boom' }, '💥'), h('strong', { lang: 'en' }, 'Science Fail!'));
+      screen.append(p);
+      await api.wait(1700);
+      p.remove();
+      await api.wait(400);
+    };
+    return demoPlayer({
+      label: 'ডেমো: কীভাবে খেলবে',
+      lang: 'bn',
+      script: async (screen, api) => {
+        screen.classList.add('dm-plain');
+        await round(screen, api, 1, 'কোনটি পানিতে ভাসছে?', ['পাথর', 'কাঠ', 'দুটিই', 'কোনোটিই না'], 0, 1);
+        await round(screen, api, 2, 'কোনটি পানির নিচে ডুবে আছে?', ['কাঠ', 'পাথর', 'দুটিই', 'কোনোটিই না'], 1, 1);
+        screen.replaceChildren(h('div', { class: 'dm-end' },
+          h('strong', {}, `${toBn(perGame)}টি প্রশ্ন · ${bnTime(cfg.timeLimitSeconds)} মিনিট`),
+          h('span', {}, `কমপক্ষে ${toBn(need)}টি সঠিক হলেই পুরস্কার! 🎁`),
+        ));
+        await api.wait(2600);
+      },
+    });
   }
 
   return { destroy: teardown };

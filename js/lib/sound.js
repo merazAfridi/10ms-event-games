@@ -7,7 +7,7 @@
  * is used because it starts with no delay.
  */
 const SRC = 'assets/sounds/page-flip.mp3';
-const VOLUME = 0.7;
+const VOLUME = 2.5; // above 1 = louder than the file itself
 const IOS = /iP(hone|ad|od)/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
 
 let bytes = null;
@@ -99,13 +99,21 @@ async function playEngine(asked) {
   const src = c.createBufferSource();
   const gain = c.createGain();
   gain.gain.value = VOLUME;
+  const limiter = c.createDynamicsCompressor(); // loud without crackling
+  limiter.threshold.value = -3;
+  limiter.ratio.value = 20;
+  limiter.attack.value = 0.002;
   src.buffer = buffer;
-  src.connect(gain).connect(c.destination);
+  src.connect(gain).connect(limiter).connect(c.destination);
   src.start();
   return true;
 }
 
 // ---------------------------------------------------------------- public
+
+/** The shared Web Audio engine (arcade.js plays its music and effects through it). */
+export const audio = () => engine();
+
 
 export function initSound() {
   prefetch();

@@ -4,17 +4,19 @@ This is a game website for the 10 Minute School "কৃতী শিক্ষা
 
 ## The games
 
-**বাংলা – কথায় কথায় বাগধারা**
-You see a short situation. Pick the বাগধারা that matches it from 4 options. There are 6 questions and you must answer all of them. After each answer you see the right বাগধারা and its meaning. Get 4 or more right to win.
+**বাংলা – বাংলা চ্যালেঞ্জ**
+Eight questions in a random order: spelling, the odd word out, a comic strip to match with a বাগধারা, and pictures of writers. Each has 4 options and you answer all of them. Get 5 or more right within 2 minutes to win.
 
 **English – Verb Hunt!**
-Pick a level: easy, medium or hard. Each level is a short story. Tap every verb you can find and press Check. Green means correct. Red means wrong. Yellow means you missed it. Wrong taps lower your score. Get 85% or more to win.
+One short story, "The Unexpected Day". Tap every verb you can find and press Check. Green means correct. Red means wrong. Yellow means you missed it. Wrong taps lower your score. Get 85% or more within 2 minutes to win.
 
 **Math – Shape Challenge**
-A shape appears on the screen. Draw it with your finger. The game checks how close your drawing is. If you get 85% or more the shape is done and the next one comes. Finish 2 shapes in 2 minutes to win.
+There are three shapes: a circle, a pentagon and a hexagon. One appears on the screen. Draw it with your finger. The game checks how close your drawing is. If you get 85% or more the shape is done and the next one comes. Finish 2 shapes in 2 minutes, with at most 10 tries (drawings), to win.
 
 **Science – Science Challenge**
-You get five picture questions. The answer that looks right is often wrong. A wrong answer shows a funny "Science Fail!" animation. A right answer explains the science. Get 2 right in 2 minutes to win.
+You get eight picture questions, picked at random from the eleven in the file. The answer that looks right is often wrong. A wrong answer shows a funny "Science Fail!" animation. A right answer explains the science. Answer all eight within 2 minutes; get 5 or more right to win.
+
+On the shelf each book shows its difficulty: বাংলা and Science are Easy, English and Math are Hard.
 
 ## How the rewards work
 
@@ -22,10 +24,10 @@ When you win you see a "Challenge Completed!" screen with a gift code. If you do
 
 | Game | To win |
 |---|---|
-| বাংলা | 4 out of 6 correct |
-| English | 85% on one level |
-| Math | 2 shapes in 2 minutes |
-| Science | 2 correct in 2 minutes |
+| বাংলা | 5 out of 8 correct in 2 minutes |
+| English | 85% on the story in 2 minutes |
+| Math | 2 shapes in 2 minutes, max 10 tries |
+| Science | 5 out of 8 correct in 2 minutes |
 
 ### The gift code
 

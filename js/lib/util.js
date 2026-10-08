@@ -1,4 +1,5 @@
 /** Small DOM + formatting helpers shared by every screen. */
+import { sfx } from './arcade.js';
 
 /**
  * Create an element. Props: class, style (string), dataset, on<event> handlers,
@@ -60,9 +61,11 @@ const PATTERNS = {
   wrong: [45, 60, 45],
   success: [20, 50, 30],
   win: [30, 60, 30, 60, 120],
+  lose: [60, 80, 60],
 };
-/** Light vibration where supported (Android). iOS Safari has no vibration API, so this is a no-op there. */
+/** Feedback for a moment in the game: its arcade sound, plus a light vibration where supported (Android). */
 export function haptic(kind) {
+  sfx(kind);
   try {
     if (navigator.vibrate) navigator.vibrate(PATTERNS[kind] ?? 10);
   } catch {

@@ -17,9 +17,6 @@
   "shapes": [
     { "name": "Circle", "sides": 0 },
     { "name": "Pentagon", "sides": 5 },
-    { "name": "Hexagon", "sides": 6 },
-    { "name": "Heptagon", "sides": 7 },
-    { "name": "Octagon", "sides": 8 },
-    { "name": "Nonagon", "sides": 9 }
+    { "name": "Hexagon", "sides": 6 }
   ]
 }

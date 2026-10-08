@@ -23,6 +23,9 @@
 @font-face { font-family: 'Hind Siliguri'; font-style: normal; font-weight: 700; font-display: swap;
   src: url(../assets/fonts/hind-siliguri-latin-700-normal.woff2) format('woff2');
   unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD; }
+/* Bold, rounded Bangla digits for the timer and top-bar counters (clearer from far away than Hind Siliguri). */
+@font-face { font-family: 'Baloo Da 2'; font-style: normal; font-weight: 700; font-display: swap;
+  src: url(../assets/fonts/baloo-da-2-bengali-700-normal.woff2) format('woff2'); unicode-range: U+0964-0965, U+0980-09FE; }
 @font-face { font-family: 'Fredoka'; font-style: normal; font-weight: 600; font-display: swap;
   src: url(../assets/fonts/fredoka-latin-600-normal.woff2) format('woff2'); }
 @font-face { font-family: 'Fredoka'; font-style: normal; font-weight: 700; font-display: swap;
@@ -63,6 +66,7 @@
 
   --font: 'Hind Siliguri', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
   --display: 'Fredoka', 'Hind Siliguri', system-ui, sans-serif;
+  --counter: 'Baloo Da 2', 'Fredoka', 'Hind Siliguri', system-ui, sans-serif;
   --mono: ui-monospace, 'SF Mono', Menlo, Consolas, 'Roboto Mono', monospace;
 }
 
@@ -323,6 +327,19 @@ body:not(.ready) #home::after {
   font-size: 15px;
   color: rgba(255, 246, 226, .75);
 }
+/* Difficulty pill under each subject: green = Easy, red = Hard. */
+.book-label .book-level {
+  display: inline-block;
+  margin-top: 10px;
+  padding: 4px 14px;
+  border-radius: 999px;
+  font: 700 14px/1.2 var(--display);
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  color: #fff;
+}
+.book-level.easy { background: #2b8a3e; box-shadow: 0 3px 0 #1d6a2e; }
+.book-level.hard { background: #c92a2a; box-shadow: 0 3px 0 #8f1d1d; }
 
 .home-foot {
   position: relative;
@@ -1127,6 +1144,7 @@ body:not(.ready) #home::after {
 .board .book-label strong { font-size: 32px; }
 .board .book-label strong:lang(bn) { font-size: 34px; }
 .board .book-label span { margin-top: 4px; font-size: 19px; }
+.board .book-label .book-level { padding: 5px 18px; margin-top: 12px; font-size: 18px; }
 
 .board .home-foot { padding-bottom: 36px; }
 .board .home-hint { font-size: 18px; }
@@ -1160,8 +1178,10 @@ body:not(.ready) #home::after {
 .board .chip { min-height: 48px; padding: 8px 18px; gap: 8px; font-size: 19px; }
 .board .chip strong { font-size: 22px; }
 .board .chip svg { width: 22px; height: 22px; }
-.board .topbar .timer { font-size: 23px; }
-.board .topbar .timer svg { width: 25px; height: 25px; }
+.board .topbar .chip { min-height: 58px; padding: 6px 22px; font: 700 26px/1 var(--counter); }
+.board .topbar .chip strong { font-size: 32px; font-weight: 700; }
+.board .topbar .timer { min-width: 180px; min-height: 66px; justify-content: center; font-size: 44px; } /* min-width: the chip doesn't jump as digits change */
+.board .topbar .timer svg { width: 38px; height: 38px; }
 .board .done-chip { font-size: 18px; }
 .board .progress-label { font-size: 26px; }
 .board .counter { font-size: 20px; }
@@ -1170,6 +1190,12 @@ body:not(.ready) #home::after {
 .board .btn { min-height: 60px; font-size: 20px; border-radius: 18px; }
 .board .btn svg { width: 26px; height: 26px; }
 .board .btn.big { min-height: 70px; font-size: 23px; border-radius: 20px; }
+/* The Start button on each game's first screen is the biggest button of all. */
+.board .intro + .bottom-bar .btn { flex-basis: 580px; min-height: 90px; border-radius: 24px; font-size: 32px; }
+.board .intro + .bottom-bar .btn svg { width: 32px; height: 32px; }
+/* ...and it floats up and down like the books on the shelf. `translate`, not transform, so the press effect still works. */
+.board .intro + .bottom-bar .btn { animation: btn-float 3.4s ease-in-out infinite; }
+@keyframes btn-float { 0%, 100% { translate: 0 0; } 50% { translate: 0 -10px; } }
 
 .board .kicker { font-size: 16px; }
 .board [lang='bn'] .kicker { font-size: 20px; }
@@ -1199,7 +1225,282 @@ body:not(.ready) #home::after {
   align-items: start;
 }
 .board .quiz-answer { padding-top: 32px; } /* first answer starts level with the question, below the "challenge" line */
-.board .picture-quiz { grid-template-columns: minmax(0, 3fr) minmax(0, 2fr); } /* more room for the picture */
+/* Picture questions: wider screen, most of it for the picture; the first answer starts level with the picture's top. */
+.board .game:has(.picture-quiz) { --col: 1520px; }
+.board .picture-quiz {
+  grid-template-columns: minmax(0, 2fr) minmax(0, 1fr);
+  grid-template-rows: auto auto 1fr; /* question, picture, rest */
+  gap: 0 40px;
+}
+.board .picture-quiz .quiz-ask { display: contents; }
+.board .picture-quiz .quiz-ask > * { grid-column: 1; }
+.board .picture-quiz .quiz-answer { grid-column: 2; grid-row: 2 / -1; padding-top: 0; } /* first answer starts level with the top of the picture */
+.board .q-caption { margin: 8px 0 0; font-size: 26px; font-weight: 700; color: var(--ink-2); }
+.board .picture-quiz:has(.q-caption) .q-image { max-height: 498px; } /* room for the caption */
+.board .picture-quiz .q-image { width: auto; max-width: 100%; max-height: 550px; } /* stays clear of the "next" bar on the 900px-tall stage */
+/* Bangla text-only and picture-answer questions: the question across the top, the answers below. */
+.board .game:has(.stage-quiz) { --col: 1520px; }
+.board .stage-head { text-align: center; }
+.board .stage-quiz .q-title { margin: 0 auto 50px; font-size: 54px; line-height: 1.3; } /* breathing room above the answers */
+.board .text-stage .options { grid-template-columns: 1fr 1fr; gap: 22px 24px; }
+.board .text-stage .option { min-height: 116px; padding: 16px 26px; gap: 20px; border-radius: 22px; font-size: 34px; }
+.board .text-stage .opt-letter { width: 60px; height: 60px; border-radius: 16px; font-size: 30px; }
+.board .bangla-quiz .opt-mark, .board .bangla-quiz .opt-mark svg { width: 40px; height: 40px; }
+/* Text-only questions: question on the left, answers stacked on the right, both starting on the same line. */
+.board .game:has(.text-split) { --col: 1520px; }
+.board .text-split { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 0 56px; }
+.board .text-split .stage-head { text-align: left; }
+.board .text-split .q-title { margin: 0; font-size: 62px; line-height: 1.3; }
+.board .text-split .stage-head .q-title::after { margin: 22px 0 0; }
+.board .text-split .quiz-answer { padding-top: 0; }
+.board .text-split .options { grid-template-columns: 1fr; gap: 16px; }
+.board .text-split .option { min-height: 86px; padding: 12px 24px; font-size: 40px; }
+.board .text-split .opt-letter { width: 60px; height: 60px; font-size: 32px; }
+.board .text-split .feedback { margin-top: 18px; padding: 14px 20px; }
+/* Science reads as big as Bangla: question, answers and feedback. */
+.board [data-subject='science'] .q-title { font-size: 44px; }
+/* wider answer column, so the explanation after a wrong answer fits without scrolling */
+.board [data-subject='science'] .picture-quiz { grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr); }
+.board [data-subject='science'] .options { gap: 10px; }
+.board [data-subject='science'] .option { min-height: 68px; padding-top: 8px; padding-bottom: 8px; font-size: 30px; }
+.board [data-subject='science'] .opt-letter { width: 50px; height: 50px; font-size: 24px; }
+.board [data-subject='science'] .fb-verdict { font-size: 29px; }
+.board [data-subject='science'] .fb-label { font-size: 21px; }
+.board [data-subject='science'] .fb-answer-line { margin-bottom: 6px !important; font-size: 25px; }
+.board [data-subject='science'] .fb-answer-line strong { color: var(--good); }
+.board [data-subject='science'] .fb-meaning { font-size: 23px; line-height: 1.55; }
+.board [data-subject='science'] .feedback { margin-top: 14px; padding: 14px 20px; }
+/* Bangla reads bigger everywhere: the comic question, its answers and the feedback. */
+.board .bangla-quiz.picture-quiz .q-title { font-size: 44px; }
+.board .bangla-quiz.picture-quiz .options { gap: 10px; }
+.board .bangla-quiz.picture-quiz .option.is-correct, .board .bangla-quiz.picture-quiz .option.is-wrong { outline-width: 4px; outline-offset: 0; }
+.board .bangla-quiz.picture-quiz .option { min-height: 68px; padding-top: 10px; padding-bottom: 10px; font-size: 29px; }
+.board .bangla-quiz .fb-verdict { font-size: 29px; }
+.board .bangla-quiz .fb-verdict svg { width: 32px; height: 32px; }
+.board .bangla-quiz .fb-label { font-size: 21px; }
+.board .bangla-quiz .fb-answer { font-size: 34px; }
+.board .bangla-quiz .fb-meaning { font-size: 24px; line-height: 1.6; }
+
+/* Bangla answers in colour: one colour per position (orange, green, blue, purple) on every question.
+   Text answers are bright game-show cards; picture answers get a thick frame and badge in that colour. */
+.bangla-quiz .option { --c1: #c2410c; --c2: #9a3412; --edge: #6e250c; }
+.bangla-quiz .option:nth-child(2) { --c1: #237a36; --c2: #17602a; --edge: #0f431d; }
+.bangla-quiz .option:nth-child(3) { --c1: #1864ab; --c2: #0f4c8a; --edge: #0a3563; }
+.bangla-quiz .option:nth-child(4) { --c1: #6741d9; --c2: #4527a8; --edge: #311b7a; }
+.bangla-quiz .option.is-correct { --c1: #237a36; --c2: #17602a; --edge: #0f431d; outline: 5px solid var(--good); outline-offset: 4px; }
+/* The wrong pick fades like the others; only a red box shows it was the one chosen. */
+.bangla-quiz .option.is-wrong { outline: 5px solid var(--bad); outline-offset: 4px; box-shadow: none; }
+.bangla-quiz .option.is-wrong:not(.pic-option) {
+  background: linear-gradient(rgba(236, 233, 228, .74), rgba(236, 233, 228, .74)), linear-gradient(135deg, var(--c1), var(--c2));
+  box-shadow: 0 6px 0 rgba(0, 0, 0, .08);
+  color: rgba(255, 255, 255, .9);
+  text-shadow: none;
+}
+.bangla-quiz .option.is-wrong .opt-letter { opacity: .5; }
+.bangla-quiz .option.is-wrong .opt-mark, .bangla-quiz .option.is-wrong:not(.pic-option) .opt-mark { color: var(--bad); }
+.board .pic-option.is-wrong { border-color: color-mix(in srgb, var(--c1) 35%, #f4efe6); }
+.board .pic-option.is-wrong .opt-img { opacity: .35; filter: grayscale(.5); }
+.board .pic-option.is-wrong .opt-mark { background: var(--bad); color: #fff; }
+.bangla-quiz .option.is-dim { opacity: .35; filter: grayscale(.5); }
+.bangla-quiz .option { transition: transform .15s, box-shadow .15s, opacity .25s, filter .25s; }
+@media (hover: hover) {
+  .bangla-quiz .option:hover:not(:disabled) { transform: translateY(-4px); box-shadow: 0 10px 0 var(--edge), 0 18px 28px rgba(40, 30, 20, .2); }
+}
+.bangla-quiz .option:active:not(:disabled) { transform: translateY(4px); box-shadow: 0 2px 0 var(--edge); }
+
+.bangla-quiz .option:not(.pic-option) {
+  border: 0;
+  background:
+    radial-gradient(circle at 88% 18%, rgba(255, 255, 255, .14) 0 34px, transparent 35px),
+    radial-gradient(circle at 76% 92%, rgba(255, 255, 255, .08) 0 52px, transparent 53px),
+    radial-gradient(circle at 6% 100%, rgba(0, 0, 0, .08) 0 60px, transparent 61px),
+    linear-gradient(135deg, var(--c1), var(--c2));
+  box-shadow: 0 6px 0 var(--edge), 0 14px 24px rgba(40, 30, 20, .16);
+  color: #fff;
+  text-shadow: 0 2px 0 rgba(0, 0, 0, .18);
+}
+.bangla-quiz .option:not(.pic-option):disabled { color: #fff; }
+.bangla-quiz .option:not(.pic-option) .opt-letter { background: #fff; color: var(--c2); text-shadow: none; box-shadow: 0 3px 0 rgba(0, 0, 0, .15); }
+.bangla-quiz .option:not(.pic-option) .opt-mark { color: #fff; }
+
+.board .pic-stage .options { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 36px; align-items: start; padding-left: 12px; }
+.board .pic-option { position: relative; display: block; padding: 8px; border: 6px solid var(--c1); border-radius: 24px; background: #fff; box-shadow: 0 6px 0 var(--edge), 0 14px 24px rgba(40, 30, 20, .16); }
+.board .pic-option.is-correct { border-color: var(--c1); background: #fff; }
+.board .pic-option.is-wrong { background: #fff; }
+.board .opt-img { display: block; width: 100%; max-height: 330px; object-fit: contain; border-radius: 14px; background: #fff; }
+.board .pic-option .opt-letter { position: absolute; top: -24px; left: -24px; z-index: 1; width: 60px; height: 60px; margin: 0; border: 4px solid #fff; border-radius: 50%; background: var(--c1); color: #fff; font-size: 27px; box-shadow: 0 3px 0 var(--edge); } /* on the frame's corner, clear of faces */
+.board .pic-option .opt-mark { position: absolute; top: 18px; right: 18px; width: 52px; height: 52px; padding: 6px; border-radius: 50%; background: var(--c1); color: #fff; }
+.board .pic-option .opt-mark:empty { display: none; }
+.board .stage-quiz .feedback { max-width: 1100px; margin: 20px auto 0; text-align: center; }
+.board .stage-quiz .fb-verdict { justify-content: center; }
+
+/* Bangla entrance: the question pops in, then the answers deal in one by one. */
+.bangla-quiz .q-title { animation: q-pop .55s cubic-bezier(.2, 1.4, .4, 1) both; }
+.bangla-quiz .kicker { animation: rise .4s ease-out both; }
+.bangla-quiz .stage-head .q-title::after {
+  content: '';
+  display: block;
+  width: 200px;
+  height: 8px;
+  margin: 18px auto 0;
+  border-radius: 6px;
+  background: linear-gradient(90deg, #c2410c 0 25%, #237a36 25% 50%, #1864ab 50% 75%, #6741d9 75%);
+  transform-origin: center;
+  animation: draw-line .5s .35s ease-out both;
+}
+.bangla-quiz .q-image { animation: rise .5s .15s ease-out both; }
+.bangla-quiz .option:not(.is-correct):not(.is-wrong) { animation: deal .45s calc(.3s + var(--i, 0) * .1s) cubic-bezier(.2, 1.2, .4, 1) backwards; } /* backwards: hover and press can move the card afterwards */
+/* ---------- Start-screen demo: a looping mock round with a pointing hand ---------- */
+.demo { margin: 16px auto 0; width: min(840px, 100%); }
+.demo-frame {
+  position: relative;
+  height: 346px;
+  overflow: hidden;
+  border: 3px solid var(--line);
+  border-radius: 24px;
+  background: var(--paper);
+  box-shadow: 0 14px 30px rgba(70, 50, 20, .12);
+}
+.demo-screen { position: absolute; inset: 0; display: flex; flex-direction: column; gap: 14px; padding: 14px 22px 18px; }
+.demo-tag { display: flex; align-items: center; justify-content: center; gap: 12px; margin-top: 10px; font-size: 26px; font-weight: 700; color: var(--ink-2); }
+.demo-dot { width: 16px; height: 16px; border-radius: 50%; background: #e03131; animation: blink 1.2s infinite; }
+.demo-hand {
+  position: absolute;
+  left: 0;
+  top: 0;
+  z-index: 5;
+  margin: -6px 0 0 -24px; /* puts the fingertip on the point */
+  font-size: 56px;
+  line-height: 1;
+  opacity: 0;
+  pointer-events: none;
+  filter: drop-shadow(0 4px 6px rgba(0, 0, 0, .3));
+  transition: transform 650ms ease-in-out, opacity .3s;
+}
+.demo-hand.on { opacity: 1; }
+.demo-ripple { position: absolute; left: -24px; top: -24px; z-index: 4; width: 48px; height: 48px; border: 4px solid var(--accent); border-radius: 50%; opacity: 0; pointer-events: none; }
+.demo-ripple.go { animation: demo-ripple .5s ease-out; }
+@keyframes demo-ripple { from { opacity: .9; scale: .3; } to { opacity: 0; scale: 1.7; } }
+.dm-press { transform: translateY(3px) scale(.98); }
+
+.dm-bar { display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; }
+.dm-chip { padding: 6px 18px; border-radius: 999px; background: var(--accent-soft); color: var(--accent-ink); font: 700 20px/1.2 var(--counter); white-space: nowrap; }
+.dm-time { justify-self: end; }
+.dm-split { flex: 1; display: grid; grid-template-columns: 1fr 1fr; gap: 26px; align-items: start; }
+.dm-q { margin: 6px 0 0; font-size: 34px; line-height: 1.3; font-weight: 700; }
+.dm-q.small { margin: 0 0 10px; font-size: 24px; }
+.dm-pic { display: block; width: 100%; height: auto; max-height: 236px; }
+
+.dm-opts { display: grid; gap: 11px; }
+.dm-opt {
+  --c1: #c2410c; --c2: #9a3412; --edge: #6e250c;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-height: 54px;
+  padding: 6px 16px;
+  border-radius: 14px;
+  background: linear-gradient(135deg, var(--c1), var(--c2));
+  box-shadow: 0 4px 0 var(--edge);
+  color: #fff;
+  font-size: 25px;
+  font-weight: 700;
+  transition: transform .12s, opacity .3s, filter .3s;
+}
+.dm-opt:nth-child(2) { --c1: #237a36; --c2: #17602a; --edge: #0f431d; }
+.dm-opt:nth-child(3) { --c1: #1864ab; --c2: #0f4c8a; --edge: #0a3563; }
+.dm-opt:nth-child(4) { --c1: #6741d9; --c2: #4527a8; --edge: #311b7a; }
+.dm-opt b { display: grid; place-items: center; width: 36px; height: 36px; border-radius: 10px; background: #fff; color: var(--c2); font-size: 20px; }
+.dm-opt.ok { --c1: #237a36; --c2: #17602a; --edge: #0f431d; outline: 4px solid var(--good); outline-offset: 3px; }
+.dm-opt.ok::after { content: '✓'; margin-left: auto; }
+.dm-opt.bad { background: linear-gradient(rgba(236, 233, 228, .74), rgba(236, 233, 228, .74)), linear-gradient(135deg, var(--c1), var(--c2)); box-shadow: none; outline: 4px solid var(--bad); outline-offset: 3px; }
+.dm-opt.bad::after { content: '✗'; margin-left: auto; color: var(--bad); }
+.dm-opt.dim { opacity: .35; filter: grayscale(.5); }
+/* Science answers look like its real cards: plain, green when right, red when wrong. */
+.dm-plain .dm-opt { background: var(--card); border: 2px solid var(--line); box-shadow: 0 3px 0 var(--line); color: var(--ink); font-size: 23px; }
+.dm-plain .dm-opt b { background: var(--accent-soft); color: var(--accent-ink); }
+.dm-plain .dm-opt.ok { background: var(--good-soft); border-color: var(--good); outline: 0; }
+.dm-plain .dm-opt.ok::after { color: var(--good); }
+.dm-plain .dm-opt.bad { background: var(--bad-soft); border-color: var(--bad); outline: 0; }
+
+.dm-pop { position: absolute; inset: 0; z-index: 3; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 14px; color: #fff; animation: fade-in .15s; }
+.dm-pop.yes { background: rgba(12, 40, 24, .92); }
+.dm-pop.no { background: rgba(44, 14, 18, .92); }
+.dm-pop.fail { background: rgba(24, 18, 44, .94); }
+.dm-pop img { width: 330px; height: 196px; object-fit: cover; border: 5px solid #fff; border-radius: 16px; animation: react-in .45s cubic-bezier(.2, 1.5, .4, 1) both; }
+.dm-pop strong { font-size: 38px; line-height: 1.2; animation: fail-title .45s .15s cubic-bezier(.2, 1.6, .4, 1) both; }
+.dm-pop.yes strong { color: #ffe066; text-shadow: 0 3px 0 #1d7330; }
+.dm-pop.no strong { color: #ffa8a8; text-shadow: 0 3px 0 #8f1d1d; }
+.dm-pop.fail strong { font-family: var(--display); color: #ffcf5a; text-shadow: 0 3px 0 #b33a2e; }
+.dm-boom { font-size: 92px; line-height: 1; animation: pop-in .4s cubic-bezier(.2, 1.4, .4, 1) both; }
+.dm-pop.score { background: rgba(255, 252, 245, .9); color: var(--good); }
+.dm-pop.score strong { font: 700 84px/1 var(--display); }
+.dm-pop.score span { font-size: 28px; font-weight: 700; }
+
+.dm-para { margin: 4px 0 0; padding: 16px 22px; border: 2px solid var(--line); border-radius: 16px; background: var(--card); font-size: 29px; line-height: 1.85; }
+.dm-w { padding: 2px 6px; border-radius: 8px; transition: background-color .2s; }
+.dm-w.sel { background: var(--accent-soft); box-shadow: 0 0 0 3px var(--accent); }
+.dm-w.ok { background: var(--good-soft); color: var(--good); box-shadow: 0 0 0 3px var(--good); }
+.dm-w.bad { background: var(--bad-soft); color: var(--bad); box-shadow: 0 0 0 3px var(--bad); }
+.dm-w.miss { background: #fff3bf; box-shadow: 0 0 0 3px #f59f00; }
+.dm-btn { align-self: center; padding: 10px 44px; border-radius: 16px; background: var(--accent); box-shadow: 0 5px 0 var(--accent-ink); color: #fff; font: 700 24px/1.3 var(--display); transition: transform .12s; }
+.dm-legend { display: flex; justify-content: center; gap: 22px; font-size: 20px; font-weight: 700; animation: rise .3s ease-out; }
+.dm-legend .ok { color: var(--good); }
+.dm-legend .bad { color: var(--bad); }
+.dm-legend .miss { color: #e67700; }
+
+.dm-target { display: flex; align-items: baseline; justify-content: center; gap: 12px; }
+.dm-target span { font-size: 20px; color: var(--ink-2); }
+.dm-target strong { font: 700 36px/1 var(--display); letter-spacing: .02em; }
+.dm-pad { align-self: center; width: 204px; height: 204px; border: 2px solid var(--line); border-radius: 22px; background: #fff radial-gradient(circle, #d9d2c4 1.5px, transparent 2px) 0 0 / 22px 22px; }
+.dm-pad svg { display: block; width: 100%; height: 100%; }
+.dm-ink { fill: none; stroke: var(--accent); stroke-width: 6; stroke-linecap: round; stroke-linejoin: round; }
+
+.dm-end { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 16px; text-align: center; animation: pop-in .4s cubic-bezier(.2, 1.4, .4, 1) both; }
+.dm-end strong { font-size: 36px; line-height: 1.3; }
+.dm-end span { font-size: 30px; font-weight: 700; color: var(--accent-ink); }
+
+/* Bangla reaction pop-up after each answer (like Science Fail). */
+.react-fx {
+  position: absolute;
+  inset: 0;
+  z-index: 30;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 18px;
+  padding: 24px;
+  text-align: center;
+  color: #fff;
+  animation: fade-in .15s;
+  -webkit-backdrop-filter: blur(4px);
+  backdrop-filter: blur(4px);
+}
+.react-fx.yes { background: radial-gradient(circle at 50% 40%, rgba(64, 192, 87, .35), transparent 60%), rgba(12, 40, 24, .93); }
+.react-fx.no { background: radial-gradient(circle at 50% 40%, rgba(250, 82, 82, .3), transparent 60%), rgba(44, 14, 18, .93); }
+.react-img {
+  display: block;
+  width: min(620px, 80%);
+  max-height: 58%;
+  object-fit: cover;
+  border: 6px solid #fff;
+  border-radius: 24px;
+  box-shadow: 0 18px 40px rgba(0, 0, 0, .45);
+}
+.react-fx.yes .react-img { animation: react-in .5s cubic-bezier(.2, 1.5, .4, 1) both; }
+.react-fx.no .react-img { animation: react-in .35s ease-out both, react-nope .5s .35s ease-in-out; }
+.react-title { font-size: 64px; line-height: 1.2; font-weight: 700; animation: fail-title .5s .25s cubic-bezier(.2, 1.6, .4, 1) both; }
+.react-fx.yes .react-title { color: #ffe066; text-shadow: 0 4px 0 #1d7330; }
+.react-fx.no .react-title { color: #ffa8a8; text-shadow: 0 4px 0 #8f1d1d; }
+.react-fx .fail-skip { margin-top: 0; font-size: 18px; }
+@keyframes react-in { from { opacity: 0; transform: scale(.6) rotate(-4deg); } to { opacity: 1; transform: none; } }
+@keyframes react-nope { 20%, 60% { transform: translateX(-14px) rotate(-1deg); } 40%, 80% { transform: translateX(14px) rotate(1deg); } }
+
+@keyframes q-pop { from { opacity: 0; transform: scale(.85) translateY(10px); } to { opacity: 1; transform: none; } }
+@keyframes draw-line { from { transform: scaleX(0); } }
+@keyframes deal { from { opacity: 0; transform: translateY(26px) scale(.96); } to { opacity: 1; transform: none; } }
+
 .board .q-title { margin-bottom: 18px; font-size: 34px; }
 .board .situation p { font-size: 22px; }
 .board .question { margin: 24px 2px 0; }
@@ -1238,15 +1539,32 @@ body:not(.ready) #home::after {
 .board .stat span { font-size: 16px; }
 
 /* ---------- Math ---------- */
-.board .shape-strip { gap: 16px; margin-bottom: 20px; }
-.board .shape-chip { padding: 14px 6px 12px; font-size: 18px; }
-.board .shape-chip .shape-icon { width: 56px; height: 56px; }
-.board .target { gap: 16px; padding-top: 12px; padding-bottom: 4px; }
-.board .target-icon { width: 74px; height: 74px; padding: 9px; border-radius: 18px; }
-.board .target-label { font-size: 17px; }
-.board .target-name { font-size: 38px; }
-.board .target-meta { max-width: none; font-size: 18px; }
-.board .pad-wrap { padding: 14px 40px; }
+.board .shape-strip { grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 4px; } /* one row, so the demo fits below */
+.board .shape-chip { padding: 10px 4px 8px; font-size: 17px; }
+.board .shape-chip .shape-icon { width: 44px; height: 44px; }
+/* Play screen: big "Draw a CIRCLE" on the left, the pad in the middle, the hint on the right. */
+.board .math-chips { display: flex; gap: 14px; }
+.board .tries-chip { background: #fff4e6; color: #c2410c; }
+.board .tries-chip.low { background: var(--bad-soft); color: var(--bad); }
+.board .math-stage { flex: 1 1 auto; min-height: 0; display: grid; grid-template-columns: 330px minmax(0, 1fr) 330px; align-items: center; gap: 24px; padding: 8px 48px 4px; }
+.board .math-stage .target { flex-direction: column; align-items: flex-start; gap: 18px; padding: 0; }
+.board .target-icon { width: 230px; height: 230px; padding: 26px; border-radius: 40px; }
+.board .target-label { font-size: 30px; }
+.board .target-name { font-size: 66px; line-height: 1; }
+.board .math-stage .target-meta { max-width: none; font-size: 38px; line-height: 1.3; font-weight: 700; text-align: left; color: var(--accent-ink); }
+.board .pad-wrap { height: 100%; padding: 6px 0; }
+/* Clear and Skip: light, colourful buttons */
+.board .btn-clear { background: #e7f5ff; color: #1864ab; box-shadow: inset 0 0 0 2px #a5d8ff, 0 4px 0 #a5d8ff; }
+.board .btn-skip { background: #fff4e6; color: #c2410c; box-shadow: inset 0 0 0 2px #ffc078, 0 4px 0 #ffc078; }
+.board .btn-clear, .board .btn-skip { font-size: 26px; font-weight: 700; }
+/* Start screen: each shape in its own colour */
+.board .shape-chip:nth-child(1) { background: #fff4e6; border-color: #ffc078; color: #c2410c; }
+.board .shape-chip:nth-child(1) .shape-icon { stroke: #e8590c; }
+.board .shape-chip:nth-child(2) { background: #e7f5ff; border-color: #a5d8ff; color: #1864ab; }
+.board .shape-chip:nth-child(2) .shape-icon { stroke: #1c7ed6; }
+.board .shape-chip:nth-child(3) { background: #f3f0ff; border-color: #d0bfff; color: #5f3dc4; }
+.board .shape-chip:nth-child(3) .shape-icon { stroke: #7048e8; }
+.board .shape-chip { border-width: 2px; font-size: 20px; font-weight: 700; }
 .board .pad-box { border-radius: 28px; background-size: 30px 30px; }
 .board .pad-hint { font-size: 22px; }
 .board .pop-num { font-size: 120px; }
@@ -1267,16 +1585,13 @@ body:not(.ready) #home::after {
 .board .rv-answer { font-size: 21px; }
 .board .best-list li { min-height: 62px; padding: 10px 20px; font-size: 20px; }
 .board .result-actions { grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 28px; }
-.board .win {
-  --col: 1400px;
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
-  gap: 0 56px;
-  align-items: center;
-}
-.board .win .best-list { grid-template-columns: 1fr; margin-top: 0; }
-.board .trophy { width: 130px; height: 130px; }
-.board .code-card { margin-top: 24px; padding: 24px 24px 20px; }
+.board .win { --col: 780px; padding-top: 12px; padding-bottom: 20px; } /* one column, like on a phone */
+.board .win .result-head { padding-bottom: 0; }
+.board .win .best-list { grid-template-columns: repeat(auto-fit, minmax(0, 1fr)); margin-top: 18px; }
+.board .win .best-list li { flex-direction: column; justify-content: center; gap: 2px; min-height: 0; padding: 8px 12px; text-align: center; }
+.board .win .result-actions { margin-top: 18px; }
+.board .trophy { width: 100px; height: 100px; }
+.board .code-card { margin-top: 18px; padding: 20px 24px 16px; }
 .board .code-label { font-size: 15px; }
 .board .code { font-size: 64px; }
 .board .code-meta { font-size: 18px; }

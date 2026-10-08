@@ -11,7 +11,7 @@
  * If you add new files (e.g. a new cover image name), add them to PRECACHE.
  * Bump VERSION when you remove or rename files so old copies are cleaned up.
  */
-const VERSION = 'v25';
+const VERSION = 'v66';
 const CACHE = `book-of-games-${VERSION}`;
 
 const PRECACHE = [
@@ -28,6 +28,8 @@ const PRECACHE = [
   'js/lib/reward.js',
   'js/lib/sound.js',
   'js/lib/attempts.js',
+  'js/lib/demo.js',
+  'js/lib/arcade.js',
   'js/games/bangla.js',
   'js/games/english.js',
   'js/games/math.js',
@@ -46,6 +48,23 @@ const PRECACHE = [
   'assets/science/q3.jpg',
   'assets/science/q4.jpg',
   'assets/science/q5.jpg',
+  'assets/science/q6.jpg',
+  'assets/science/q7b.jpg',
+  'assets/science/q8.jpg',
+  'assets/science/q9.jpg',
+  'assets/science/q10.jpg',
+  'assets/science/q11.jpg',
+  'assets/bangla/comic-2.jpg',
+  'assets/bangla/rabi-1.jpg',
+  'assets/bangla/rabi-2.jpg',
+  'assets/bangla/rabi-3.jpg',
+  'assets/bangla/rabi-4.jpg',
+  'assets/bangla/poet-1.jpg',
+  'assets/bangla/poet-2.jpg',
+  'assets/bangla/poet-3.jpg',
+  'assets/bangla/poet-4.jpg',
+  'assets/bangla/react-yes.jpg',
+  'assets/bangla/react-no.jpg',
   'assets/brand/10ms-logo-light.svg',
   'assets/sounds/page-flip.mp3',
   'assets/fonts/hind-siliguri-bengali-400-normal.woff2',
@@ -56,6 +75,7 @@ const PRECACHE = [
   'assets/fonts/hind-siliguri-latin-700-normal.woff2',
   'assets/fonts/fredoka-latin-600-normal.woff2',
   'assets/fonts/fredoka-latin-700-normal.woff2',
+  'assets/fonts/baloo-da-2-bengali-700-normal.woff2',
   'assets/icons/favicon-32.png',
   'assets/icons/favicon-48.png',
   'assets/icons/icon-192.png',
