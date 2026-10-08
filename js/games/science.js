@@ -81,7 +81,7 @@ export function mount(root, ctx) {
     const timerChip = h('div', { class: 'chip timer', role: 'timer' }, icon('clock'), timerText);
     const correctCount = h('strong', {}, toBn(0));
     const bar = h('div', { class: 'progress-fill', style: 'width:0%' });
-    const main = h('main', { class: 'scroll quiz' });
+    const main = h('main', { class: `scroll quiz${all.some((c) => c.image) ? ' picture-quiz' : ''}` });
     const footer = h('footer', { class: 'bottom-bar', hidden: true });
 
     root.replaceChildren(

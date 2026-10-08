@@ -1198,6 +1198,8 @@ body:not(.ready) #home::after {
   gap: 0 48px;
   align-items: start;
 }
+.board .quiz-answer { padding-top: 32px; } /* first answer starts level with the question, below the "challenge" line */
+.board .picture-quiz { grid-template-columns: minmax(0, 3fr) minmax(0, 2fr); } /* more room for the picture */
 .board .q-title { margin-bottom: 18px; font-size: 34px; }
 .board .situation p { font-size: 22px; }
 .board .question { margin: 24px 2px 0; }
