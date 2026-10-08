@@ -2,15 +2,16 @@
  * Service worker: makes the games work offline after the first visit.
  *
  * - Everything below is downloaded and stored on the device during the first visit.
- * - Page + content/*.json: try the network first (so edits show up), fall back to the
- *   stored copy after 3 seconds or when offline.
- * - Everything else (JS, CSS, fonts, images): served instantly from storage and
+ * - Page, code (JS, CSS) and content/*.json: try the network first, fall back to the
+ *   stored copy after 3 seconds or when offline. Code and content always come from the
+ *   same place, so new questions never meet old code that can't show them.
+ * - Everything else (fonts, images, sounds): served instantly from storage and
  *   refreshed in the background.
  *
  * If you add new files (e.g. a new cover image name), add them to PRECACHE.
  * Bump VERSION when you remove or rename files so old copies are cleaned up.
  */
-const VERSION = 'v24';
+const VERSION = 'v25';
 const CACHE = `book-of-games-${VERSION}`;
 
 const PRECACHE = [
@@ -85,7 +86,7 @@ self.addEventListener('fetch', (event) => {
   const url = new URL(request.url);
   if (request.method !== 'GET' || url.origin !== self.location.origin) return;
 
-  const fresh = request.mode === 'navigate' || url.pathname.endsWith('.json') || url.pathname.endsWith('.webmanifest');
+  const fresh = request.mode === 'navigate' || /\.(json|webmanifest|js|css)$/.test(url.pathname);
   event.respondWith(fresh ? networkFirst(request) : staleWhileRevalidate(request, event));
 });
 
