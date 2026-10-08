@@ -6,7 +6,7 @@
 import { h, loadJSON, reducedMotion, done } from './lib/util.js';
 import { topBar, button } from './lib/ui.js';
 import { verifyRewardCode } from './lib/reward-code.js';
-import { initSound, playFlip } from './lib/sound.js';
+import { initSound, playFlip, isMuted, setMuted } from './lib/sound.js';
 import { setSoundOptions, startMusic, stopMusic } from './lib/arcade.js';
 import * as bangla from './games/bangla.js';
 import * as english from './games/english.js';
@@ -60,6 +60,7 @@ async function boot() {
   ]);
   if (cfg.status === 'fulfilled') config = cfg.value;
   setSoundOptions(config.sound);
+  startMusic(); // see the note at initSound() below
   BOOKS.forEach((b, i) => { if (books[i].status === 'fulfilled') content[b.id] = books[i].value; });
 
   // A fresh visit always starts on the shelf, even if the address still points at a game
@@ -116,7 +117,30 @@ function renderHome() {
     ),
     h('div', { class: 'shelf', role: 'list' }, slots),
     h('div', { class: 'home-foot' }, h('p', { class: 'home-hint' }, 'Tap a book to open')),
+    muteButton(),
   );
+}
+
+const SPEAKER = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9.5h3.5L12 5.5v13l-4.5-4H4z" fill="currentColor"/>';
+const SOUND_ON = `${SPEAKER}<path d="M15.5 9a4.5 4.5 0 0 1 0 6M18 6.5a8 8 0 0 1 0 11" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>`;
+const SOUND_OFF = `${SPEAKER}<path d="M16 9.5l5 5M21 9.5l-5 5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>`;
+
+/** Small corner button on the shelf: sound is on all the time unless someone mutes it here. */
+function muteButton() {
+  const btn = h('button', { class: 'mute-btn', type: 'button' });
+  const show = () => {
+    btn.innerHTML = isMuted() ? SOUND_OFF : SOUND_ON;
+    btn.setAttribute('aria-label', isMuted() ? 'Sound off: tap to turn on' : 'Sound on: tap to mute');
+    btn.classList.toggle('off', isMuted());
+  };
+  btn.addEventListener('click', () => {
+    setMuted(!isMuted());
+    if (isMuted()) stopMusic();
+    else startMusic();
+    show();
+  });
+  show();
+  return btn;
 }
 
 function onBookTap(i) {
@@ -201,7 +225,6 @@ async function openBook(book, animate) {
     ? (root) => book.module.mount(root, { content: content[book.id], config, goHome })
     : (root) => mountError(root, book.id);
   openScreen(book.id, book.lang, mountFn);
-  startMusic(); // background music while a game is open
   if (animate && !reducedMotion()) await playOpen(book);
   else showGameLayer(true);
 }
@@ -210,7 +233,6 @@ async function closeScreen(animate) {
   const book = BOOKS.find((b) => b.id === current.id);
   if (animate && book && !reducedMotion()) await playClose(book);
   try { current.instance?.destroy?.(); } catch (err) { console.error(err); }
-  stopMusic();
   current = null;
   showGameLayer(false);
   gameEl.replaceChildren();
@@ -399,4 +421,8 @@ if ('serviceWorker' in navigator && (location.protocol === 'https:' || ['localho
 }
 
 initSound();
+// Music plays all the time. Try straight away: it plays at once where the browser allows sound
+// without a tap (set Media autoplay to Allow on the smartboard). Otherwise the first tap anywhere
+// lets the browser start it, and it carries on from there.
+['pointerdown', 'keydown'].forEach((e) => document.addEventListener(e, () => startMusic(), true));
 boot();

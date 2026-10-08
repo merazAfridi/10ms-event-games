@@ -114,6 +114,11 @@ async function playEngine(asked) {
 /** The shared Web Audio engine (arcade.js plays its music and effects through it). */
 export const audio = () => engine();
 
+/** One switch for every sound on the site (the mute button on the shelf). */
+let muted = false;
+export const isMuted = () => muted;
+export function setMuted(value) { muted = Boolean(value); }
+
 
 export function initSound() {
   prefetch();
@@ -125,7 +130,7 @@ export function initSound() {
 /** Play the flip. Safe to call twice in a row (tap + animation): the second call is ignored. */
 export async function playFlip() {
   const asked = performance.now();
-  if (pending || asked - lastPlay < 800) return;
+  if (muted || pending || asked - lastPlay < 800) return;
   pending = true;
   try {
     // no await before this call: on iPhone play() has to start inside the tap

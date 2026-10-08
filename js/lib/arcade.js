@@ -5,7 +5,7 @@
  *
  * Browsers only allow sound after a touch; sound.js unlocks the shared audio engine on every tap.
  */
-import { audio } from './sound.js';
+import { audio, isMuted } from './sound.js';
 
 const opts = { music: true, effects: true, musicVolume: 1, effectsVolume: 1 };
 export function setSoundOptions(o = {}) { Object.assign(opts, o); }
@@ -78,7 +78,7 @@ const EFFECTS = {
 };
 
 export function sfx(kind) {
-  if (!opts.effects || !EFFECTS[kind]) return;
+  if (isMuted() || !opts.effects || !EFFECTS[kind]) return;
   const c = audio();
   if (!c || c.state !== 'running') return;
   const out = c.createGain();
@@ -89,16 +89,41 @@ export function sfx(kind) {
 
 // ---------------------------------------------------------------- background music
 
-const BPM = 138;
-const STEP = 60 / BPM / 2; // one eighth note
-// Four bars of eighths (C, Am, F, G): arpeggio lead, pumping bass.
-const LEAD = [
-  76, 79, 84, 79, 76, 79, 84, 88,
-  72, 76, 81, 76, 72, 76, 81, 84,
-  77, 81, 84, 81, 77, 81, 84, 89,
-  79, 83, 86, 83, 79, 83, 86, 91,
+// Fast, driving video-game level music: running lead tune (Am F C G), pumping octave bass,
+// kick + snare backbeat. One eighth note per step; the top end is filtered so the speed
+// doesn't turn into a headache.
+const _ = null; // a rest
+const BPM = 156;
+const STEP = 60 / BPM / 2;
+const LEVEL = 0.44;
+const ROOTS = [45, 41, 48, 43, 45, 41, 48, 43];
+const MELODY = [
+  69, 72, 76, 72, 81, 79, 76, 72,
+  77, 76, 72, 69, 72, _, 74, 76,
+  76, 79, 84, 79, 76, 74, 72, 74,
+  71, 74, 79, 74, 71, _, 67, _,
+  81, _, 81, 79, 81, 84, 81, 79,
+  77, _, 77, 76, 77, 81, 77, 76,
+  76, 79, 76, 74, 72, 74, 76, 79,
+  79, _, 77, _, 74, _, 71, _,
 ];
-const BASS = [48, 45, 41, 43];
+
+/** Plays eighth note number i of the loop at time t. */
+function playStep(c, out, i, t) {
+  const bar = Math.floor(i / 8);
+  const beat = i % 8;
+  const m = MELODY[i];
+  if (m) {
+    const len = STEP * (MELODY[(i + 1) % MELODY.length] ? 0.85 : 1.8);
+    note(c, out, { midi: m, type: 'square', at: t, len, vol: 0.07 });
+    note(c, out, { midi: m - 12, type: 'triangle', at: t, len, vol: 0.09 });
+  }
+  // pumping bass: root, octave, root, octave...
+  note(c, out, { midi: ROOTS[bar] + (i % 2 ? 12 : 0), type: 'triangle', at: t, len: STEP * 0.8, vol: 0.34 });
+  if (beat % 4 === 0) note(c, out, { hz: 160, slideTo: 45, type: 'sine', at: t, len: 0.13, vol: 0.55 }); // kick
+  if (beat % 4 === 2) hit(c, out, t, 'bandpass', 1800, 0.18, 0.09); // snare
+  if (i % 2) hit(c, out, t, 'highpass', 8000, 0.025, 0.03); // very quiet hi-hat
+}
 
 let master = null;
 let timer = 0;
@@ -109,46 +134,48 @@ function schedule() {
   const c = audio();
   if (!c || !master) return;
   while (nextAt < c.currentTime + 0.15) {
-    const i = step % LEAD.length;
-    const root = BASS[Math.floor(i / 8)];
-    note(c, master, { midi: LEAD[i], at: nextAt, len: STEP * 0.8, vol: 0.09 });
-    note(c, master, { midi: root + (i % 2 ? 12 : 0), type: 'triangle', at: nextAt, len: STEP * 0.9, vol: 0.32 });
-    if (i % 2 === 1) { // soft off-beat hi-hat
-      const n = c.createBufferSource();
-      n.buffer = noise(c);
-      const g = c.createGain();
-      const hp = c.createBiquadFilter();
-      hp.type = 'highpass';
-      hp.frequency.value = 7000;
-      g.gain.setValueAtTime(0.05, nextAt);
-      g.gain.exponentialRampToValueAtTime(0.0001, nextAt + 0.04);
-      n.connect(hp).connect(g).connect(master);
-      n.start(nextAt);
-      n.stop(nextAt + 0.05);
-    }
+    playStep(c, master, step % MELODY.length, nextAt);
     nextAt += STEP;
     step += 1;
   }
 }
 
+/** A short burst of filtered noise (drums). */
+function hit(c, out, t, type, hz, vol, len) {
+  const n = c.createBufferSource();
+  n.buffer = noise(c);
+  const f = c.createBiquadFilter();
+  f.type = type;
+  f.frequency.value = hz;
+  const g = c.createGain();
+  g.gain.setValueAtTime(vol, t);
+  g.gain.exponentialRampToValueAtTime(0.0001, t + len);
+  n.connect(f).connect(g).connect(out);
+  n.start(t);
+  n.stop(t + len + 0.01);
+}
+
 let noiseBuf = null;
 function noise(c) {
   if (noiseBuf) return noiseBuf;
-  noiseBuf = c.createBuffer(1, c.sampleRate * 0.05, c.sampleRate);
+  noiseBuf = c.createBuffer(1, c.sampleRate * 0.12, c.sampleRate);
   const d = noiseBuf.getChannelData(0);
   for (let i = 0; i < d.length; i++) d[i] = Math.random() * 2 - 1;
   return noiseBuf;
 }
 
 export function startMusic() {
-  if (!opts.music || timer) return;
+  if (isMuted() || !opts.music || timer) return;
   const c = audio();
   if (!c) return;
   if (c.state !== 'running') c.resume().catch(() => {});
   master = c.createGain();
   master.gain.setValueAtTime(0.0001, c.currentTime);
-  master.gain.exponentialRampToValueAtTime(0.6 * opts.musicVolume, c.currentTime + 1);
-  master.connect(output(c));
+  master.gain.exponentialRampToValueAtTime(LEVEL * opts.musicVolume, c.currentTime + 1.5);
+  const lp = c.createBiquadFilter();
+  lp.type = 'lowpass';
+  lp.frequency.value = 3800;
+  master.connect(lp).connect(output(c));
   step = 0;
   nextAt = c.currentTime + 0.1;
   timer = setInterval(schedule, 40);
