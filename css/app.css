@@ -993,6 +993,14 @@ body:not(.ready) #home::after {
    SCIENCE – Science Challenge
    ===================================================================== */
 .pre { white-space: pre-line; }
+.q-image {
+  display: block;
+  width: 100%;
+  height: auto;
+  border-radius: var(--radius);
+  background: var(--paper-2);
+  box-shadow: 0 0 0 1px var(--line), 0 12px 26px rgba(70, 50, 20, .08);
+}
 
 .fail-fx {
   position: absolute;

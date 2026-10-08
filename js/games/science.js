@@ -1,4 +1,4 @@
-/** Game 4 – Science Challenge: deceptive science situations, 2-minute timer, 2 correct answers win. */
+/** Game 4 – Science Challenge: picture questions with a twist, 2-minute timer, 2 correct answers win. */
 import { h, html, toBn, shuffle, haptic, icon, formatTime, reducedMotion } from '../lib/util.js';
 import { topBar, button, scoreRing, resultView } from '../lib/ui.js';
 import { showWinScreen } from '../lib/reward.js';
@@ -39,6 +39,7 @@ export function mount(root, ctx) {
   const all = (data.challenges || []).filter((c) => c && c.answer);
   const need = Math.max(1, Math.min(cfg.challengesToWin, all.length));
   const fill = (text) => String(text).replace('{time}', bnTime(cfg.timeLimitSeconds)).replace('{target}', toBn(need));
+  all.forEach((c) => { if (c.image) new Image().src = c.image; }); // pictures are ready before the timer starts
 
   let cleanup = [];
   const track = (fn) => cleanup.push(fn);
@@ -129,7 +130,8 @@ export function mount(root, ctx) {
         h('div', { class: 'quiz-ask' },
           h('p', { class: 'kicker' }, `চ্যালেঞ্জ ${toBn(st.i + 1)}/${toBn(order.length)}`),
           h('h1', { class: 'q-title' }, c.title),
-          h('section', { class: 'card situation' },
+          c.image && h('img', { class: 'q-image', src: c.image, alt: '', draggable: 'false' }),
+          c.situation && h('section', { class: 'card situation' },
             h('h2', { class: 'card-label' }, 'পরিস্থিতি'),
             h('p', { class: 'pre' }, c.situation),
           ),

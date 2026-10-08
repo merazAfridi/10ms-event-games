@@ -14,7 +14,7 @@ Pick a level: easy, medium or hard. Each level is a short story. Tap every verb 
 A shape appears on the screen. Draw it with your finger. The game checks how close your drawing is. If you get 85% or more the shape is done and the next one comes. Finish 2 shapes in 2 minutes to win.
 
 **Science – Science Challenge**
-You get tricky science questions. The answer that looks right is often wrong. A wrong answer shows a funny "Science Fail!" animation. A right answer explains the science. Get 2 right in 2 minutes to win.
+You get five picture questions. The answer that looks right is often wrong. A wrong answer shows a funny "Science Fail!" animation. A right answer explains the science. Get 2 right in 2 minutes to win.
 
 ## How the rewards work
 
