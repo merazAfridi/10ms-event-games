@@ -408,16 +408,9 @@ document.addEventListener('gesturestart', (e) => e.preventDefault());
 document.addEventListener('touchmove', (e) => { if (e.touches.length > 1) e.preventDefault(); }, { passive: false });
 
 if ('serviceWorker' in navigator && (location.protocol === 'https:' || ['localhost', '127.0.0.1'].includes(location.hostname))) {
+  // No reload when a new version is deployed: online, the page, code and content already come
+  // fresh from the network (sw.js), so the first load is already the new version.
   window.addEventListener('load', () => navigator.serviceWorker.register('sw.js').catch((err) => console.warn('SW', err)));
-  // A new version was deployed: reload once to use it, but never in the middle of a game.
-  if (navigator.serviceWorker.controller) {
-    let reloaded = false;
-    navigator.serviceWorker.addEventListener('controllerchange', () => {
-      if (reloaded || current) return;
-      reloaded = true;
-      location.reload();
-    });
-  }
 }
 
 initSound();

@@ -8,7 +8,7 @@
   "sound": {
     "music": true,
     "effects": true,
-    "musicVolume": 1,
+    "musicVolume": 0.765,
     "effectsVolume": 1
   },
 
