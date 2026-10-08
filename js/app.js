@@ -1,7 +1,7 @@
 /**
  * Book of Games – app shell.
  * Home carousel, book open/close animation, hash router (#/bangla, #/english, #/math, #/verify),
- * content loading and service-worker registration.
+ * big-screen stage, content loading and service-worker registration.
  */
 import { h, loadJSON, reducedMotion, done } from './lib/util.js';
 import { topBar, button } from './lib/ui.js';
@@ -34,6 +34,28 @@ let carousel;
 let activeIndex = 0;
 
 const gameName = (book) => content[book.id]?.title || book.title;
+
+// ---------------------------------------------------------------- big screens
+
+// Landscape screens (smartboards, laptops, tablets) get a stage laid out at 1600×900 and
+// scaled up to fill the screen, so a 4K board shows the same layout as a 1080p one, only sharper.
+// Phones keep the portrait layout. The stage size follows the screen's shape, so nothing is cut off.
+const STAGE_W = 1600;
+const STAGE_H = 900;
+const boardQuery = window.matchMedia('(orientation: landscape) and (min-width: 900px) and (min-height: 520px)');
+const isBoard = () => boardQuery.matches;
+
+function fitStage() {
+  const root = document.documentElement;
+  root.classList.toggle('board', isBoard());
+  if (!isBoard()) return;
+  const k = Math.min(window.innerWidth / STAGE_W, window.innerHeight / STAGE_H);
+  root.style.setProperty('--stage-k', String(k));
+  root.style.setProperty('--stage-w', `${window.innerWidth / k}px`);
+  root.style.setProperty('--stage-h', `${window.innerHeight / k}px`);
+}
+fitStage();
+window.addEventListener('resize', fitStage); // registered before the carousel's own resize handler
 
 // ---------------------------------------------------------------- boot
 
@@ -103,7 +125,10 @@ function renderHome() {
     carousel,
     h('div', { class: 'home-foot' },
       h('div', { class: 'dots' }, dots),
-      h('p', { class: 'home-hint' }, 'Swipe to choose · Tap a book to open'),
+      h('p', { class: 'home-hint' },
+        h('span', { class: 'hint-phone' }, 'Swipe to choose · Tap a book to open'),
+        h('span', { class: 'hint-board' }, 'Tap a book to open'),
+      ),
     ),
   );
   setActive(0);
@@ -119,6 +144,10 @@ function onCarouselScroll() {
 /** Scale/tilt each book by its distance from the centre and pick the active one. */
 function updateCarousel() {
   scrollFrame = 0;
+  if (isBoard()) { // every book is on the shelf at once: nothing to tilt
+    slots.forEach((slot) => { slot.style.setProperty('--d', '0'); slot.style.setProperty('--ad', '0'); });
+    return;
+  }
   const box = carousel.getBoundingClientRect();
   const centre = box.left + box.width / 2;
   let best = activeIndex;
@@ -152,7 +181,7 @@ function scrollToBook(i, smooth = true) {
 
 function onBookTap(i) {
   if (current) return;
-  if (i !== activeIndex) { scrollToBook(i); return; } // a peeking book: bring it to the centre first
+  if (i !== activeIndex && !isBoard()) { scrollToBook(i); return; } // a peeking book: bring it to the centre first
   if (!reducedMotion()) playFlip(); // start inside the tap: phones trust sound started by a touch
   animateNext = BOOKS[i].id;
   cameFromHome = true;
@@ -280,13 +309,14 @@ const px = (r, radius) => ({
 function fxGeometry(book) {
   const slot = slots[BOOKS.indexOf(book)];
   const appBox = app.getBoundingClientRect();
+  const k = appBox.width / app.offsetWidth || 1; // the big-screen stage is scaled; positions inside it are not
   const r = slot.querySelector('.book-body').getBoundingClientRect();
-  const W = appBox.width;
-  const H = appBox.height;
+  const W = app.offsetWidth;
+  const H = app.offsetHeight;
   const bw = Math.min(W - 40, (H - 140) * 0.75);
   return {
     slot,
-    card: { left: r.left - appBox.left, top: r.top - appBox.top, width: r.width, height: r.height },
+    card: { left: (r.left - appBox.left) / k, top: (r.top - appBox.top) / k, width: r.width / k, height: r.height / k },
     mid: { left: (W - bw) / 2, top: (H - bw / 0.75) / 2, width: bw, height: bw / 0.75 },
     full: { left: 0, top: 0, width: W, height: H },
   };

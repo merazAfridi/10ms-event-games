@@ -82,19 +82,24 @@ export function mount(root, ctx) {
       ),
     );
 
+    // Two blocks: they stack on phones and sit side by side on big screens.
     const main = h('main', { class: 'scroll quiz' },
-      h('p', { class: 'kicker' }, `চ্যালেঞ্জ ${toBn(n)}`),
-      h('h1', { class: 'q-title' }, c.title),
-      h('section', { class: 'card situation' },
-        h('h2', { class: 'card-label' }, 'পরিস্থিতি'),
-        h('p', {}, c.situation),
+      h('div', { class: 'quiz-ask' },
+        h('p', { class: 'kicker' }, `চ্যালেঞ্জ ${toBn(n)}`),
+        h('h1', { class: 'q-title' }, c.title),
+        h('section', { class: 'card situation' },
+          h('h2', { class: 'card-label' }, 'পরিস্থিতি'),
+          h('p', {}, c.situation),
+        ),
+        h('section', { class: 'question' },
+          h('h2', { class: 'card-label' }, 'প্রশ্ন'),
+          h('p', { class: 'q-text' }, c.question),
+        ),
       ),
-      h('section', { class: 'question' },
-        h('h2', { class: 'card-label' }, 'প্রশ্ন'),
-        h('p', { class: 'q-text' }, c.question),
+      h('div', { class: 'quiz-answer' },
+        h('div', { class: 'options', role: 'group', 'aria-label': 'উত্তর বেছে নাও' }, optionButtons),
+        feedback,
       ),
-      h('div', { class: 'options', role: 'group', 'aria-label': 'উত্তর বেছে নাও' }, optionButtons),
-      feedback,
     );
 
     root.replaceChildren(
@@ -163,7 +168,7 @@ export function mount(root, ctx) {
       device: countWin('bangla'),
       num: toBn,
       labels: {
-        plays: 'এই ফোনে খেলা হয়েছে: {plays} বার',
+        plays: 'এই ডিভাইসে খেলা হয়েছে: {plays} বার',
         wins: 'পুরস্কার জিতেছে: {wins} বার',
         title: data.winTitle || 'চ্যালেঞ্জ সম্পন্ন!',
         message: data.winMessage || 'সারপ্রাইজ পুরস্কার পেতে এই স্ক্রিনটি দেখাও!',

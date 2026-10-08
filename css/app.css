@@ -1,5 +1,6 @@
 /* =====================================================================
-   Book of Games – mobile-only styles (portrait, 360–430px wide)
+   Book of Games – phones (portrait, 360–430px wide) first; big landscape
+   screens such as smartboards get the BIG SCREENS section further down
    ===================================================================== */
 
 /* ---------- Fonts (bundled locally; browsers only fetch the subsets they need) ---------- */
@@ -1159,6 +1160,221 @@ body:not(.ready) #home::after {
 .verify-out p { margin: 0; padding: 14px 16px; border-radius: 14px; font-size: 17px; line-height: 1.5; }
 .verify-out.good p { background: var(--good-soft); color: #0d5c37; }
 .verify-out.bad p { background: var(--bad-soft); color: #8e1f27; }
+
+/* =====================================================================
+   BIG SCREENS – smartboards, laptops, landscape tablets
+   app.js adds .board to <html> and sets --stage-w / --stage-h / --stage-k.
+   Everything here is laid out on a 1600×900 stage that is scaled to fill
+   the screen (a 3840×2160 board shows it 2.4× bigger, pixel-sharp).
+   ===================================================================== */
+.hint-board { display: none; }
+.board .hint-phone { display: none; }
+.board .hint-board { display: inline; }
+
+.board #app {
+  top: 0;
+  left: 0;
+  right: auto;
+  max-width: none;
+  width: var(--stage-w);
+  height: var(--stage-h);
+  border-radius: 0;
+  box-shadow: none;
+  transform: scale(var(--stage-k));
+  transform-origin: 0 0;
+}
+
+/* ---------- Home: all four books on one shelf ---------- */
+.board .home-head { padding-top: 64px; }
+.board .home-head::after { width: 64px; height: 4px; margin-top: 20px; }
+.board .brand-logo { height: 46px; margin-bottom: 20px; }
+.board .event-name { font-size: 50px; }
+
+.board .carousel {
+  --book-w: 300px;
+  --gap: 80px;
+  justify-content: center;
+  overflow: visible;
+  scroll-snap-type: none;
+  touch-action: manipulation;
+  padding: 0 0 24px;
+}
+.board .carousel::before,
+.board .carousel::after { display: none; }
+.board .book-tilt { transform: none; opacity: 1; transition: transform .15s; }
+.board .book:active .book-tilt { transform: scale(.96); }
+.board .book-slot .book-float { animation: float 3.4s ease-in-out infinite; }
+.board .book-slot .book-shadow { animation: float-shadow 3.4s ease-in-out infinite; }
+.board .book-slot:nth-child(2) .book-float, .board .book-slot:nth-child(2) .book-shadow { animation-delay: -.85s; }
+.board .book-slot:nth-child(3) .book-float, .board .book-slot:nth-child(3) .book-shadow { animation-delay: -1.7s; }
+.board .book-slot:nth-child(4) .book-float, .board .book-slot:nth-child(4) .book-shadow { animation-delay: -2.55s; }
+.board .book-label { margin-top: 42px; opacity: 1; transform: none; }
+.board .book-label strong { font-size: 32px; }
+.board .book-label strong:lang(bn) { font-size: 34px; }
+.board .book-label span { margin-top: 4px; font-size: 19px; }
+
+.board .dots { display: none; }
+.board .home-foot { padding-bottom: 36px; }
+.board .home-hint { font-size: 18px; }
+
+.board .fx-title small { font-size: 18px; }
+.board .fx-title small:lang(bn) { font-size: 23px; }
+.board .fx-title strong { font-size: 44px; }
+
+/* ---------- Game screens: content in a centred column ---------- */
+/* The top and bottom bars share one width; quieter screens read better in a narrower column. */
+.board .game { --col: 1400px; }
+.board .intro { --col: 1040px; }
+.board .result { --col: 960px; }
+
+.board .topbar,
+.board .scroll,
+.board .bottom-bar,
+.board .target {
+  padding-left: max(40px, calc((100% - var(--col)) / 2));
+  padding-right: max(40px, calc((100% - var(--col)) / 2));
+}
+.board .topbar { min-height: 84px; padding-top: 12px; padding-bottom: 12px; gap: 16px; }
+.board .scroll { padding-top: 28px; padding-bottom: 40px; }
+.board .intro { padding-top: 16px; }
+.board .progress { height: 8px; margin: 0 max(40px, calc((100% - var(--col)) / 2)); }
+.board .bottom-bar { justify-content: center; gap: 16px; padding-top: 16px; padding-bottom: 20px; }
+.board .bottom-bar .btn { flex: 0 1 440px; }
+
+.board .icon-btn { width: 60px; height: 60px; border-radius: 18px; }
+.board .icon-btn svg { width: 30px; height: 30px; }
+.board .chip { min-height: 48px; padding: 8px 18px; gap: 8px; font-size: 19px; }
+.board .chip strong { font-size: 22px; }
+.board .chip svg { width: 22px; height: 22px; }
+.board .topbar .timer { font-size: 23px; }
+.board .topbar .timer svg { width: 25px; height: 25px; }
+.board .done-chip { font-size: 18px; }
+.board .progress-label { font-size: 26px; }
+.board .counter { font-size: 20px; }
+.board .counter strong { font-size: 24px; }
+
+.board .btn { min-height: 60px; font-size: 20px; border-radius: 18px; }
+.board .btn svg { width: 26px; height: 26px; }
+.board .btn.big { min-height: 70px; font-size: 23px; border-radius: 20px; }
+
+.board .kicker { font-size: 16px; }
+.board [lang='bn'] .kicker { font-size: 20px; }
+.board .intro-hero { padding: 0 0 22px; }
+.board .intro-title { font-size: 44px; }
+.board .intro-title.display { font-size: 58px; }
+.board .intro-title.caps { font-size: 52px; }
+.board .intro-sub { font-size: 21px; }
+.board .tagline { font-size: 18px; }
+.board .card { padding: 24px 28px; }
+.board .card-label { font-size: 15px; }
+.board [lang='bn'] .card-label { font-size: 19px; }
+.board .rule-card p { font-size: 22px; }
+.board .steps { gap: 10px; padding-left: 30px; font-size: 21px; }
+.board .section-title { margin: 26px 2px 12px; font-size: 26px; }
+.board .facts { gap: 16px; }
+.board .facts li { flex-direction: row; justify-content: center; align-items: baseline; gap: 10px; padding: 10px 8px; }
+.board .facts strong { font-size: 30px; }
+.board .facts span { font-size: 19px; }
+.board .small { font-size: 17px; }
+
+/* ---------- Bangla / Science quiz: question left, answers right ---------- */
+.board .quiz {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 0 48px;
+  align-items: start;
+}
+.board .q-title { margin-bottom: 18px; font-size: 34px; }
+.board .situation p { font-size: 22px; }
+.board .question { margin: 24px 2px 0; }
+.board .q-text { font-size: 23px; }
+.board .options { gap: 14px; }
+.board .option { min-height: 78px; padding: 12px 18px; gap: 16px; border-radius: 18px; font-size: 22px; }
+.board .opt-letter { width: 46px; height: 46px; border-radius: 13px; }
+.board .opt-mark, .board .opt-mark svg { width: 30px; height: 30px; }
+.board .feedback { margin-top: 18px; padding: 20px 24px; }
+.board .fb-verdict { font-size: 24px; }
+.board .fb-verdict svg { width: 28px; height: 28px; }
+.board .fb-label { font-size: 18px; }
+.board .fb-answer { font-size: 28px; }
+.board .fb-meaning { font-size: 20px; }
+
+.board .fail-stage { margin: 40px 0 56px; transform: scale(1.5); }
+.board .fail-title { font-size: 64px; }
+.board .fail-line { font-size: 27px; }
+.board .fail-skip { font-size: 17px; }
+
+/* ---------- English ---------- */
+.board .level-list { grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px; }
+.board .level-card { min-height: 100px; padding: 14px 18px 14px 14px; gap: 16px; }
+.board .level-num { width: 66px; height: 66px; font-size: 30px; }
+.board .level-num small { font-size: 11px; }
+.board .level-info strong { font-size: 21px; }
+.board .level-info span { font-size: 16px; }
+.board .level-heading { font-size: 18px; }
+.board .para-card { padding: 14px 16px; }
+.board .para { font-size: 21px; }
+.board .legend { gap: 20px; font-size: 17px; }
+.board .lg::before { width: 20px; height: 20px; }
+.board .warn-card { font-size: 16px; }
+.board .stats { gap: 12px; }
+.board .stat strong { font-size: 28px; }
+.board .stat span { font-size: 16px; }
+
+/* ---------- Math ---------- */
+.board .shape-strip { gap: 16px; margin-bottom: 20px; }
+.board .shape-chip { padding: 14px 6px 12px; font-size: 18px; }
+.board .shape-chip .shape-icon { width: 56px; height: 56px; }
+.board .target { gap: 16px; padding-top: 12px; padding-bottom: 4px; }
+.board .target-icon { width: 74px; height: 74px; padding: 9px; border-radius: 18px; }
+.board .target-label { font-size: 17px; }
+.board .target-name { font-size: 38px; }
+.board .target-meta { max-width: none; font-size: 18px; }
+.board .pad-wrap { padding: 14px 40px; }
+.board .pad-box { border-radius: 28px; background-size: 30px 30px; }
+.board .pad-hint { font-size: 22px; }
+.board .pop-num { font-size: 120px; }
+.board .pop-text { margin-top: 10px; font-size: 38px; }
+.board .pop-detail { font-size: 21px; }
+
+/* ---------- Results and the win screen ---------- */
+.board .result-title { font-size: 44px; }
+.board .result-msg { max-width: 40ch; font-size: 21px; }
+.board .ring { width: 190px; height: 190px; }
+.board .ring-label strong { font-size: 44px; }
+.board [lang='bn'] .ring-label strong { font-size: 48px; }
+.board .ring-label span { font-size: 17px; }
+.board .review,
+.board .best-list { grid-template-columns: 1fr 1fr; gap: 12px; }
+.board .review li { padding: 14px 18px; }
+.board .rv-title { font-size: 17px; }
+.board .rv-answer { font-size: 21px; }
+.board .best-list li { min-height: 62px; padding: 10px 20px; font-size: 20px; }
+.board .result-actions { grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 28px; }
+.board .win {
+  --col: 1400px;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 0 56px;
+  align-items: center;
+}
+.board .win .best-list { grid-template-columns: 1fr; margin-top: 0; }
+.board .trophy { width: 130px; height: 130px; }
+.board .code-card { margin-top: 24px; padding: 24px 24px 20px; }
+.board .code-label { font-size: 15px; }
+.board .code { font-size: 64px; }
+.board .code-meta { font-size: 18px; }
+.board .live { padding: 6px 16px; font-size: 17px; }
+.board .device-count { font-size: 17px; }
+.board .device-count.repeat { color: inherit; } /* many players share one board, so a repeat win is normal here */
+
+.board .sheet-backdrop { align-items: center; justify-content: center; }
+.board .sheet { width: min(640px, calc(100% - 80px)); padding: 32px; border-radius: 28px; }
+.board .sheet-title { font-size: 28px; }
+.board .sheet-text { font-size: 19px; }
+
+.board .code-input { min-height: 74px; font-size: 32px; }
+.board .verify-out p { font-size: 20px; }
 
 /* =====================================================================
    Portrait only

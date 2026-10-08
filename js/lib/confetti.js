@@ -11,9 +11,10 @@ export function startConfetti(canvas, { colors = ['#f6c453', '#ff6b6b', '#4dabf7
   let trickle = 0;
 
   const resize = () => {
-    const dpr = Math.min(2, window.devicePixelRatio || 1);
     w = canvas.clientWidth;
     h = canvas.clientHeight;
+    const shown = canvas.getBoundingClientRect().width / w || 1; // > 1 on the scaled big-screen stage
+    const dpr = Math.min(2, (window.devicePixelRatio || 1) * shown);
     canvas.width = Math.round(w * dpr);
     canvas.height = Math.round(h * dpr);
     g.setTransform(dpr, 0, 0, dpr, 0, 0);

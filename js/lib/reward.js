@@ -24,13 +24,13 @@ const LABELS = {
   playAgain: 'Play Again',
   home: 'Back to Books',
   back: 'Back to books',
-  plays: 'Played on this phone: {plays}×',
+  plays: 'Played on this device: {plays}×',
   wins: 'Gifts won here: {wins}',
 };
 
 /**
  * rows: [{ label, value, ok }] shown under the code.
- * device: { plays, wins } for this game on this phone (see attempts.js), shown on the code card.
+ * device: { plays, wins } for this game on this device (see attempts.js), shown on the code card.
  * num: formats numbers for the labels (e.g. toBn for Bangla screens).
  * track(fn): registers a cleanup function (timers, confetti) with the calling game.
  */
@@ -51,7 +51,8 @@ export function showWinScreen(root, { secret, rows = [], labels = {}, device = n
   root.replaceChildren(
     confettiCanvas,
     topBar({ onBack: leave(onHome), backLabel: L.back }),
-    h('main', { class: 'scroll result win' },
+    // Two blocks: they stack on phones and sit side by side on big screens.
+    h('main', { class: 'scroll result win' }, h('div', { class: 'win-main' },
       h('div', { class: 'result-head' },
         html(TROPHY),
         h('h1', { class: 'result-title' }, L.title),
@@ -68,6 +69,7 @@ export function showWinScreen(root, { secret, rows = [], labels = {}, device = n
           L.wins.replace('{wins}', num(device.wins)),
         ),
       ),
+    ), h('div', { class: 'win-side' },
       rows.length > 0 && h('ul', { class: 'best-list' },
         rows.map((r) => h('li', { class: r.ok ? 'ok' : '' }, h('span', {}, r.label), h('strong', {}, r.value))),
       ),
@@ -75,7 +77,7 @@ export function showWinScreen(root, { secret, rows = [], labels = {}, device = n
         button(L.playAgain, leave(onPlayAgain), { kind: 'primary', iconName: 'replay' }),
         button(L.home, leave(onHome), { kind: 'secondary', iconName: 'books' }),
       ),
-    ),
+    )),
   );
 
   const clock = setInterval(() => { liveClock.textContent = now(); }, 1000);

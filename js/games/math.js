@@ -136,7 +136,8 @@ export function mount(root, ctx) {
       padSize = size;
       padBox.style.width = `${size}px`;
       padBox.style.height = `${size}px`;
-      const dpr = Math.min(3, window.devicePixelRatio || 1);
+      const shown = canvas.getBoundingClientRect().width / size || 1; // > 1 on the scaled big-screen stage
+      const dpr = Math.min(3, (window.devicePixelRatio || 1) * shown);
       canvas.width = Math.round(size * dpr);
       canvas.height = Math.round(size * dpr);
       g.setTransform(dpr, 0, 0, dpr, 0, 0);
@@ -157,8 +158,10 @@ export function mount(root, ctx) {
     canvas.addEventListener('pointercancel', onCancel);
     canvas.addEventListener('lostpointercapture', (e) => { if (e.pointerId === pointerId) onUp(e); });
 
+    /** Pointer position in pad pixels (the big-screen stage is scaled, so screen pixels differ). */
     function pos(e) {
-      return { x: e.clientX - padRect.left, y: e.clientY - padRect.top };
+      const k = padSize / padRect.width || 1;
+      return { x: (e.clientX - padRect.left) * k, y: (e.clientY - padRect.top) * k };
     }
 
     function onDown(e) {
