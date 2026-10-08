@@ -124,7 +124,7 @@ export function mount(root, ctx) {
         ),
       );
 
-      // Two blocks: they stack on phones and sit side by side on big screens.
+      // Two blocks, side by side.
       main.replaceChildren(
         h('div', { class: 'quiz-ask' },
           h('p', { class: 'kicker' }, `চ্যালেঞ্জ ${toBn(st.i + 1)}/${toBn(order.length)}`),

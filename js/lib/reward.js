@@ -51,7 +51,7 @@ export function showWinScreen(root, { secret, rows = [], labels = {}, device = n
   root.replaceChildren(
     confettiCanvas,
     topBar({ onBack: leave(onHome), backLabel: L.back }),
-    // Two blocks: they stack on phones and sit side by side on big screens.
+    // Two blocks, side by side.
     h('main', { class: 'scroll result win' }, h('div', { class: 'win-main' },
       h('div', { class: 'result-head' },
         html(TROPHY),

@@ -1,7 +1,7 @@
 /**
- * Book of Games – app shell.
- * Home carousel, book open/close animation, hash router (#/bangla, #/english, #/math, #/verify),
- * big-screen stage, content loading and service-worker registration.
+ * Book of Games – app shell (smartboard).
+ * Book shelf, book open/close animation, hash router (#/bangla, #/english, #/math, #/verify),
+ * screen-filling stage, content loading and service-worker registration.
  */
 import { h, loadJSON, reducedMotion, done } from './lib/util.js';
 import { topBar, button } from './lib/ui.js';
@@ -29,33 +29,26 @@ let current = null; // { id, instance }
 let cameFromHome = false; // true when the open game sits on top of the home entry in history
 let animateNext = null; // book id whose next open should play the animation
 let slots = [];
-let dots = [];
-let carousel;
-let activeIndex = 0;
 
 const gameName = (book) => content[book.id]?.title || book.title;
 
-// ---------------------------------------------------------------- big screens
+// ---------------------------------------------------------------- stage
 
-// Landscape screens (smartboards, laptops, tablets) get a stage laid out at 1600×900 and
-// scaled up to fill the screen, so a 4K board shows the same layout as a 1080p one, only sharper.
-// Phones keep the portrait layout. The stage size follows the screen's shape, so nothing is cut off.
+// The whole app is laid out at 1600×900 and scaled up to fill the screen, so a 4K smartboard
+// shows the same layout as a 1080p one, only sharper. The stage takes the screen's shape,
+// so a board that isn't exactly 16:9 is filled edge to edge without cutting anything off.
 const STAGE_W = 1600;
 const STAGE_H = 900;
-const boardQuery = window.matchMedia('(orientation: landscape) and (min-width: 900px) and (min-height: 520px)');
-const isBoard = () => boardQuery.matches;
 
 function fitStage() {
   const root = document.documentElement;
-  root.classList.toggle('board', isBoard());
-  if (!isBoard()) return;
   const k = Math.min(window.innerWidth / STAGE_W, window.innerHeight / STAGE_H);
   root.style.setProperty('--stage-k', String(k));
   root.style.setProperty('--stage-w', `${window.innerWidth / k}px`);
   root.style.setProperty('--stage-h', `${window.innerHeight / k}px`);
 }
 fitStage();
-window.addEventListener('resize', fitStage); // registered before the carousel's own resize handler
+window.addEventListener('resize', fitStage);
 
 // ---------------------------------------------------------------- boot
 
@@ -112,77 +105,20 @@ function renderHome() {
       ),
     ),
   );
-  carousel = h('div', { class: 'carousel', role: 'list', onscroll: onCarouselScroll }, slots);
-  dots = BOOKS.map((book, i) =>
-    h('button', { class: 'dot', type: 'button', 'aria-label': `Show the ${book.title} book`, onclick: () => scrollToBook(i) }, h('span')),
-  );
 
   homeEl.replaceChildren(
     h('header', { class: 'home-head' },
       h('img', { class: 'brand-logo', src: 'assets/brand/10ms-logo-light.svg', alt: '10 Minute School', width: '985', height: '279', draggable: 'false' }),
       h('h1', { class: 'event-name', lang: /[ঀ-৿]/.test(config.eventName || '') ? 'bn' : 'en' }, config.eventName || 'EVENT NAME'),
     ),
-    carousel,
-    h('div', { class: 'home-foot' },
-      h('div', { class: 'dots' }, dots),
-      h('p', { class: 'home-hint' },
-        h('span', { class: 'hint-phone' }, 'Swipe to choose · Tap a book to open'),
-        h('span', { class: 'hint-board' }, 'Tap a book to open'),
-      ),
-    ),
+    h('div', { class: 'shelf', role: 'list' }, slots),
+    h('div', { class: 'home-foot' }, h('p', { class: 'home-hint' }, 'Tap a book to open')),
   );
-  setActive(0);
-  requestAnimationFrame(updateCarousel);
-  window.addEventListener('resize', () => requestAnimationFrame(updateCarousel));
-}
-
-let scrollFrame = 0;
-function onCarouselScroll() {
-  if (!scrollFrame) scrollFrame = requestAnimationFrame(updateCarousel);
-}
-
-/** Scale/tilt each book by its distance from the centre and pick the active one. */
-function updateCarousel() {
-  scrollFrame = 0;
-  if (isBoard()) { // every book is on the shelf at once: nothing to tilt
-    slots.forEach((slot) => { slot.style.setProperty('--d', '0'); slot.style.setProperty('--ad', '0'); });
-    return;
-  }
-  const box = carousel.getBoundingClientRect();
-  const centre = box.left + box.width / 2;
-  let best = activeIndex;
-  let bestDistance = Infinity;
-  slots.forEach((slot, i) => {
-    const r = slot.getBoundingClientRect();
-    const d = (r.left + r.width / 2 - centre) / (r.width || 1);
-    const clamped = Math.max(-1, Math.min(1, d));
-    slot.style.setProperty('--d', clamped.toFixed(3));
-    slot.style.setProperty('--ad', Math.abs(clamped).toFixed(3));
-    if (Math.abs(d) < bestDistance) { bestDistance = Math.abs(d); best = i; }
-  });
-  if (best !== activeIndex) setActive(best);
-}
-
-function setActive(i) {
-  activeIndex = i;
-  slots.forEach((s, k) => s.classList.toggle('is-active', k === i));
-  dots.forEach((d, k) => d.setAttribute('aria-current', k === i ? 'true' : 'false'));
-}
-
-function scrollOffset(i) {
-  const slot = slots[i];
-  return slot.offsetLeft - (carousel.clientWidth - slot.offsetWidth) / 2;
-}
-
-function scrollToBook(i, smooth = true) {
-  carousel.scrollTo({ left: scrollOffset(i), behavior: smooth && !reducedMotion() ? 'smooth' : 'auto' });
-  if (!smooth) updateCarousel();
 }
 
 function onBookTap(i) {
   if (current) return;
-  if (i !== activeIndex && !isBoard()) { scrollToBook(i); return; } // a peeking book: bring it to the centre first
-  if (!reducedMotion()) playFlip(); // start inside the tap: phones trust sound started by a touch
+  if (!reducedMotion()) playFlip(); // start inside the tap: browsers trust sound started by a touch
   animateNext = BOOKS[i].id;
   cameFromHome = true;
   location.hash = `#/${BOOKS[i].id}`;
@@ -198,7 +134,7 @@ function goHome() {
   }
 }
 
-// Leaving the browser (switching apps, locking the phone, closing Safari) ends the game:
+// Leaving the browser (switching apps, turning the screen off, closing the tab) ends the game:
 // coming back shows the shelf again. A win screen is kept so the gift code can still be shown.
 let quickClose = false;
 let hiddenAt = 0;
@@ -273,10 +209,6 @@ async function closeScreen(animate) {
   current = null;
   showGameLayer(false);
   gameEl.replaceChildren();
-  if (book) {
-    const i = BOOKS.indexOf(book);
-    if (i !== activeIndex) scrollToBook(i, false);
-  }
 }
 
 function mountError(root, id) {
@@ -374,8 +306,6 @@ async function playOpen(book) {
 }
 
 async function playClose(book) {
-  const i = BOOKS.indexOf(book);
-  if (i !== activeIndex) scrollToBook(i, false);
   const geo = fxGeometry(book);
   const { fx, shade, bookEl, cover } = buildFx(book);
   const opts = (duration, easing = EASE_OUT) => ({ duration, easing, fill: 'forwards' });

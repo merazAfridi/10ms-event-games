@@ -1,6 +1,7 @@
 /* =====================================================================
-   Book of Games – phones (portrait, 360–430px wide) first; big landscape
-   screens such as smartboards get the BIG SCREENS section further down
+   Book of Games – smartboard styles (landscape, made for 3840×2160).
+   Base rules hold the shared look; the BIG SCREENS section sizes it all
+   for the 1600×900 stage that app.js scales to fill the board.
    ===================================================================== */
 
 /* ---------- Fonts (bundled locally; browsers only fetch the subsets they need) ---------- */
@@ -102,33 +103,19 @@ button { font: inherit; color: inherit; cursor: pointer; }
 img { -webkit-user-drag: none; }
 [hidden] { display: none !important; }
 
+/* The stage: laid out at 1600×900 (or a little wider/taller to match the screen's shape),
+   then scaled to fill the screen. app.js sets the three variables. */
 #app {
   position: fixed;
   top: 0;
   left: 0;
-  right: 0;
-  margin: 0 auto;
-  width: 100%;
-  max-width: 480px;
-  height: 100vh;
-  height: 100dvh;
+  width: var(--stage-w, 100vw);
+  height: var(--stage-h, 100vh);
   overflow: hidden;
   background: var(--night-2);
   isolation: isolate;
-}
-
-/* Wide screens: show a centred phone-sized column. */
-@media (min-width: 520px) {
-  body {
-    background:
-      radial-gradient(circle at 20% 10%, rgba(108, 76, 214, .25), transparent 40%),
-      radial-gradient(circle at 80% 90%, rgba(246, 196, 83, .12), transparent 40%),
-      #0c0a22;
-  }
-  #app { box-shadow: 0 0 0 1px rgba(255, 255, 255, .06), 0 30px 90px rgba(0, 0, 0, .55); }
-}
-@media (min-width: 520px) and (min-height: 1000px) {
-  #app { height: 920px; top: calc(50% - 460px); border-radius: 32px; }
+  transform: scale(var(--stage-k, 1));
+  transform-origin: 0 0;
 }
 
 .screen {
@@ -192,7 +179,7 @@ body:not(.ready) #home::after {
   flex-direction: column;
   align-items: center;
   text-align: center;
-  padding: clamp(28px, 6.5vh, 64px) 24px 0; /* sits lower on tall phones instead of hugging the top */
+  padding: 64px 24px 0;
 }
 .home-head::after {
   content: '';
@@ -227,47 +214,21 @@ body:not(.ready) #home::after {
   overflow-wrap: anywhere;
 }
 
-/* Short screens: a tighter header so the books keep their breathing room. */
-@media (max-height: 700px) {
-  .home-head { padding-top: 18px; }
-  .home-head::after { margin-top: 10px; }
-  .brand-logo { height: 26px; margin-bottom: 10px; }
-  .event-name { font-size: clamp(24px, 7vw, 30px); }
-}
-
-/* ---------- Carousel ---------- */
-.carousel {
-  --book-w: min(68vw, 300px, calc((100vh - 350px) * .75));
-  --gap: 4px;
+/* ---------- Shelf: all four books in one row ---------- */
+.shelf {
+  --book-w: 300px;
   position: relative;
   flex: 1 1 auto;
   min-height: 0;
   display: flex;
   align-items: center;
-  gap: var(--gap);
-  overflow-x: auto;
-  overflow-y: hidden;
-  scroll-snap-type: x mandatory;
-  scrollbar-width: none;
-  overscroll-behavior-x: contain;
-  -webkit-overflow-scrolling: touch;
-  touch-action: pan-x;
-  padding: 12px 0 0;
-}
-@supports (height: 100dvh) {
-  .carousel { --book-w: min(68vw, 300px, calc((100dvh - var(--safe-t) - var(--safe-b) - 350px) * .75)); }
-}
-.carousel::-webkit-scrollbar { display: none; }
-.carousel::before,
-.carousel::after {
-  content: '';
-  flex: 0 0 calc((100% - var(--book-w)) / 2 - var(--gap));
+  justify-content: center;
+  gap: 80px;
+  padding: 0 0 24px;
 }
 
 .book-slot {
   flex: 0 0 var(--book-w);
-  scroll-snap-align: center;
-  scroll-snap-stop: always;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -287,10 +248,9 @@ body:not(.ready) #home::after {
 .book-tilt {
   position: absolute;
   inset: 0;
-  transform: rotateY(calc(var(--d, 0) * -24deg)) scale(calc(1 - var(--ad, 0) * .17));
-  opacity: calc(1 - var(--ad, 0) * .35);
-  will-change: transform;
+  transition: transform .15s;
 }
+.book:active .book-tilt { transform: scale(.96); }
 
 .book-float { position: absolute; inset: 0; }
 
@@ -338,16 +298,18 @@ body:not(.ready) #home::after {
   background: radial-gradient(closest-side, rgba(0, 0, 0, .55), transparent);
 }
 
-.book-slot.is-active .book-float { animation: float 3.4s ease-in-out infinite; }
-.book-slot.is-active .book-shadow { animation: float-shadow 3.4s ease-in-out infinite; }
+.book-float { animation: float 3.4s ease-in-out infinite; }
+.book-shadow { animation: float-shadow 3.4s ease-in-out infinite; }
+/* the books bob out of step with each other */
+.book-slot:nth-child(2) .book-float, .book-slot:nth-child(2) .book-shadow { animation-delay: -.85s; }
+.book-slot:nth-child(3) .book-float, .book-slot:nth-child(3) .book-shadow { animation-delay: -1.7s; }
+.book-slot:nth-child(4) .book-float, .book-slot:nth-child(4) .book-shadow { animation-delay: -2.55s; }
 .book-slot.is-lifted .book-body,
 .book-slot.is-lifted .book-shadow { visibility: hidden; }
 
 .book-label {
   margin-top: 34px;
   text-align: center;
-  opacity: calc(1 - var(--ad, 0) * 1.6);
-  transform: translateY(calc(var(--ad, 0) * 8px));
 }
 .book-label strong {
   display: block;
@@ -367,24 +329,6 @@ body:not(.ready) #home::after {
   padding: 6px 20px calc(12px + var(--safe-b));
   text-align: center;
 }
-.dots { display: flex; justify-content: center; }
-.dot {
-  width: 48px;
-  height: 48px;
-  padding: 0;
-  border: 0;
-  background: none;
-  display: grid;
-  place-items: center;
-}
-.dot span {
-  width: 9px;
-  height: 9px;
-  border-radius: 99px;
-  background: rgba(255, 255, 255, .35);
-  transition: width .25s, background-color .25s;
-}
-.dot[aria-current='true'] span { width: 28px; background: var(--gold); }
 .home-hint { margin: 0; font-size: 13px; color: rgba(255, 246, 226, .6); }
 
 /* Freeze home animations while a game is open (saves battery). */
@@ -1162,58 +1106,20 @@ body:not(.ready) #home::after {
 .verify-out.bad p { background: var(--bad-soft); color: #8e1f27; }
 
 /* =====================================================================
-   BIG SCREENS – smartboards, laptops, landscape tablets
-   app.js adds .board to <html> and sets --stage-w / --stage-h / --stage-k.
-   Everything here is laid out on a 1600×900 stage that is scaled to fill
-   the screen (a 3840×2160 board shows it 2.4× bigger, pixel-sharp).
+   BIG SCREENS – sizes for the 1600×900 stage
+   (<html class="board"> in index.html). A 3840×2160 board shows the
+   stage 2.4× bigger, pixel-sharp.
    ===================================================================== */
-.hint-board { display: none; }
-.board .hint-phone { display: none; }
-.board .hint-board { display: inline; }
-
-.board #app {
-  top: 0;
-  left: 0;
-  right: auto;
-  max-width: none;
-  width: var(--stage-w);
-  height: var(--stage-h);
-  border-radius: 0;
-  box-shadow: none;
-  transform: scale(var(--stage-k));
-  transform-origin: 0 0;
-}
-
-/* ---------- Home: all four books on one shelf ---------- */
-.board .home-head { padding-top: 64px; }
+/* ---------- Home ---------- */
 .board .home-head::after { width: 64px; height: 4px; margin-top: 20px; }
 .board .brand-logo { height: 46px; margin-bottom: 20px; }
 .board .event-name { font-size: 50px; }
 
-.board .carousel {
-  --book-w: 300px;
-  --gap: 80px;
-  justify-content: center;
-  overflow: visible;
-  scroll-snap-type: none;
-  touch-action: manipulation;
-  padding: 0 0 24px;
-}
-.board .carousel::before,
-.board .carousel::after { display: none; }
-.board .book-tilt { transform: none; opacity: 1; transition: transform .15s; }
-.board .book:active .book-tilt { transform: scale(.96); }
-.board .book-slot .book-float { animation: float 3.4s ease-in-out infinite; }
-.board .book-slot .book-shadow { animation: float-shadow 3.4s ease-in-out infinite; }
-.board .book-slot:nth-child(2) .book-float, .board .book-slot:nth-child(2) .book-shadow { animation-delay: -.85s; }
-.board .book-slot:nth-child(3) .book-float, .board .book-slot:nth-child(3) .book-shadow { animation-delay: -1.7s; }
-.board .book-slot:nth-child(4) .book-float, .board .book-slot:nth-child(4) .book-shadow { animation-delay: -2.55s; }
-.board .book-label { margin-top: 42px; opacity: 1; transform: none; }
+.board .book-label { margin-top: 42px; }
 .board .book-label strong { font-size: 32px; }
 .board .book-label strong:lang(bn) { font-size: 34px; }
 .board .book-label span { margin-top: 4px; font-size: 19px; }
 
-.board .dots { display: none; }
 .board .home-foot { padding-bottom: 36px; }
 .board .home-hint { font-size: 18px; }
 
@@ -1366,7 +1272,7 @@ body:not(.ready) #home::after {
 .board .code-meta { font-size: 18px; }
 .board .live { padding: 6px 16px; font-size: 17px; }
 .board .device-count { font-size: 17px; }
-.board .device-count.repeat { color: inherit; } /* many players share one board, so a repeat win is normal here */
+.board .device-count.repeat { color: inherit; } /* many players share one board, so a repeat win is normal */
 
 .board .sheet-backdrop { align-items: center; justify-content: center; }
 .board .sheet { width: min(640px, calc(100% - 80px)); padding: 32px; border-radius: 28px; }
@@ -1375,29 +1281,6 @@ body:not(.ready) #home::after {
 
 .board .code-input { min-height: 74px; font-size: 32px; }
 .board .verify-out p { font-size: 20px; }
-
-/* =====================================================================
-   Portrait only
-   ===================================================================== */
-.rotate-hint { display: none; }
-@media (orientation: landscape) and (max-height: 500px) {
-  .rotate-hint {
-    position: fixed;
-    inset: 0;
-    z-index: 1000;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    gap: 14px;
-    padding: 24px;
-    background: var(--night-1);
-    color: #fff;
-    font-size: 18px;
-    text-align: center;
-  }
-  .rotate-hint svg { width: 64px; height: 64px; animation: tilt 2s ease-in-out infinite; }
-}
 
 /* =====================================================================
    Animations
@@ -1415,7 +1298,6 @@ body:not(.ready) #home::after {
 @keyframes fade-out { to { opacity: 0; } }
 @keyframes pulse { 50% { transform: scale(1.06); } }
 @keyframes blink { 50% { opacity: .25; } }
-@keyframes tilt { 0%, 100% { transform: rotate(0); } 50% { transform: rotate(-90deg); } }
 
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {

@@ -1,7 +1,7 @@
 /**
  * Service worker: makes the games work offline after the first visit.
  *
- * - Everything below is downloaded and stored on the phone during the first visit.
+ * - Everything below is downloaded and stored on the device during the first visit.
  * - Page + content/*.json: try the network first (so edits show up), fall back to the
  *   stored copy after 3 seconds or when offline.
  * - Everything else (JS, CSS, fonts, images): served instantly from storage and
@@ -10,7 +10,7 @@
  * If you add new files (e.g. a new cover image name), add them to PRECACHE.
  * Bump VERSION when you remove or rename files so old copies are cleaned up.
  */
-const VERSION = 'v22';
+const VERSION = 'v23';
 const CACHE = `book-of-games-${VERSION}`;
 
 const PRECACHE = [
