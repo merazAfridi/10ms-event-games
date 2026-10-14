@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="900" height="600" viewBox="0 0 900 600">
+  <rect width="900" height="600" fill="#f3e3c3"/>
+  <!-- a sunny window on the right -->
+  <rect x="740" y="60" width="140" height="230" rx="8" fill="#a5d8ff" stroke="#2a2330" stroke-width="5"/>
+  <path d="M810 60v230M740 175h140" stroke="#2a2330" stroke-width="5"/>
+  <circle cx="845" cy="110" r="22" fill="#ffe066"/>
+  <rect x="0" y="480" width="900" height="120" fill="#c98a4b"/>
+  <path d="M0 480h900" stroke="#2a2330" stroke-width="5"/>
+
+  <!-- light coming in through the hole -->
+  <path d="M760 240L612 300v40L760 330z" fill="#ffe066" opacity=".45"/>
+
+  <!-- a closed box, cut open at the front so we can see inside -->
+  <path d="M150 140h460v340H150z" fill="#b07a45" stroke="#2a2330" stroke-width="6" stroke-linejoin="round"/>
+  <path d="M180 170h400v290H180z" fill="#3b2a1e" stroke="#2a2330" stroke-width="5"/>
+  <path d="M150 140l40-40h460l-40 40z" fill="#c99560" stroke="#2a2330" stroke-width="6" stroke-linejoin="round"/>
+  <path d="M610 140l40-40v340l-40 40z" fill="#9c6a3a" stroke="#2a2330" stroke-width="6" stroke-linejoin="round"/>
+  <!-- the hole on the right side -->
+  <ellipse cx="630" cy="300" rx="12" ry="22" fill="#fff3bf" stroke="#2a2330" stroke-width="4"/>
+  <path d="M580 300h-40M580 326h-60M580 274h-30" stroke="#ffe066" stroke-width="5" stroke-linecap="round" opacity=".7"/>
+
+  <!-- the plant inside, still straight -->
+  <path d="M330 400h100l-12 58h-76z" fill="#e8590c" stroke="#2a2330" stroke-width="5" stroke-linejoin="round"/>
+  <rect x="322" y="392" width="116" height="16" rx="5" fill="#f76707" stroke="#2a2330" stroke-width="5"/>
+  <path d="M380 392V250" stroke="#51cf66" stroke-width="8" stroke-linecap="round"/>
+  <path d="M380 330q-46-4-56-38 40-2 56 30zM380 290q46-6 54-40-40 0-54 32z" fill="#51cf66" stroke="#2b8a3e" stroke-width="4" stroke-linejoin="round"/>
+  <circle cx="380" cy="232" r="26" fill="#fff" stroke="#2a2330" stroke-width="4"/>
+  <text x="380" y="248" font-family="Arial, Helvetica, sans-serif" font-size="40" font-weight="700" text-anchor="middle" fill="#c92a2a">?</text>
+</svg>

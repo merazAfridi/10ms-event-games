@@ -13,9 +13,10 @@
   },
 
   "math": {
-    "timeLimitSeconds": 120,
+    "timeLimitSeconds": 90,
     "shapesToWin": 2,
-    "maxTries": 10,
+    "shapesPerGame": 3,
+    "maxTries": 7,
     "passThreshold": 85,
     "strictness": 0.8,
     "minDrawingSize": 0.3,
@@ -34,30 +35,32 @@
 
   "bangla": {
     "challengesToWin": 5,
-    "timeLimitSeconds": 120,
-    "challengesPerGame": 8,
+    "timeLimitSeconds": 90,
+    "challengesPerGame": 7,
     "shuffleChallenges": true
   },
 
   "english": {
     "passAccuracy": 85,
-    "timeLimitSeconds": 120
+    "timeLimitSeconds": 90,
+    "randomStory": true
   },
 
   "science": {
-    "timeLimitSeconds": 120,
+    "timeLimitSeconds": 90,
     "challengesToWin": 5,
-    "challengesPerGame": 8,
+    "challengesPerGame": 7,
     "shuffleChallenges": true
   },
 
   "_notes": {
-    "bangla": "বাংলা চ্যালেঞ্জ: challengesToWin = correct answers needed for the gift. timeLimitSeconds = time for the whole game (120 = 2:00; 0 = no time limit). challengesPerGame = how many questions one game shows, picked at random from content/bangla.json (0 = all of them). shuffleChallenges = true to show them in a random order. Players answer all challenges; the gift code appears at the end if they reached this number (or when time runs out, if they already have it). Gift codes use the same rewardCodeSecret as Math.",
-    "english": "Verb Hunt: players pick one level and complete it. passAccuracy = accuracy (0-100) needed for the gift; accuracy = (correct taps − wrong taps) ÷ verbs in that level. timeLimitSeconds = time for the level (180 = 3:00); 0 = no time limit. Gift codes use the same rewardCodeSecret as Math.",
+    "bangla": "বাংলা চ্যালেঞ্জ: challengesToWin = correct answers needed for the gift. timeLimitSeconds = time for the whole game (90 = 1:30; 0 = no time limit). challengesPerGame = how many questions one game shows, picked at random from content/bangla.json (0 = all of them). shuffleChallenges = true to show them in a random order. Players answer all challenges; the gift code appears at the end if they reached this number (or when time runs out, if they already have it). Gift codes use the same rewardCodeSecret as Math.",
+    "english": "Verb Hunt: players complete one story. randomStory = true to give every game a random story from content/english.json (players can't choose or learn the next one); false = players pick the story themselves. passAccuracy = accuracy (0-100) needed for the gift; accuracy = (correct taps − wrong taps) ÷ verbs in that story. timeLimitSeconds = time for the story (90 = 1:30); 0 = no time limit. Gift codes use the same rewardCodeSecret as Math.",
     "science": "Science Challenge: timeLimitSeconds = length of a round, challengesToWin = correct answers needed for the gift (players answer every challenge, the result comes at the end), challengesPerGame = how many challenges one game shows, picked at random from content/science.json (0 = all of them), shuffleChallenges = true to show the challenges in a random order each game. Gift codes use the same rewardCodeSecret as Math.",
     "sound": "music = background music (plays all the time), effects = sounds for right / wrong answers, win and game over. true = on, false = off. Volumes: 1 = normal (already very loud), 0.5 = half, 0 = silent; up to 2 for even louder.",
-    "timeLimitSeconds": "Length of the Shape Challenge in seconds (120 = 2:00).",
+    "timeLimitSeconds": "Length of the Shape Challenge in seconds (90 = 1:30).",
     "shapesToWin": "How many shapes must be completed to win.",
+    "shapesPerGame": "How many shapes one game uses, picked at random from content/math.json in a random order (0 = all of them, in the file's order).",
     "maxTries": "How many drawings a player gets per game (every finished drawing counts, even a failed one). 0 = no limit.",
     "passThreshold": "Accuracy (0-100) needed to complete a shape.",
     "strictness": "Overall difficulty. 1.0 = normal, 1.2 = harder, 0.8 = easier. Try small steps of 0.1.",

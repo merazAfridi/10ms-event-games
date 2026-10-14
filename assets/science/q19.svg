@@ -1,0 +1,34 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="900" height="600" viewBox="0 0 900 600">
+  <defs>
+    <linearGradient id="water" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#a5d8ff"/>
+      <stop offset="1" stop-color="#4dabf7"/>
+    </linearGradient>
+    <clipPath id="above"><rect x="0" y="0" width="900" height="300"/></clipPath>
+    <clipPath id="below"><rect x="0" y="300" width="900" height="300"/></clipPath>
+    <g id="pencil">
+      <rect x="-14" y="-200" width="28" height="330" fill="#ffd43b" stroke="#2a2330" stroke-width="5"/>
+      <path d="M-4 -200v330" stroke="#fab005" stroke-width="6"/>
+      <rect x="-14" y="-236" width="28" height="22" fill="#ff8787" stroke="#2a2330" stroke-width="5"/>
+      <rect x="-14" y="-216" width="28" height="16" fill="#ced4da" stroke="#2a2330" stroke-width="5"/>
+      <path d="M-14 130l14 46 14-46z" fill="#f4d9a6" stroke="#2a2330" stroke-width="5" stroke-linejoin="round"/>
+      <path d="M-5 160l5 16 5-16z" fill="#2a2330"/>
+    </g>
+  </defs>
+  <!-- room, table -->
+  <rect width="900" height="600" fill="#f3e3c3"/>
+  <rect x="0" y="500" width="900" height="100" fill="#c98a4b"/>
+  <path d="M0 500h900" stroke="#2a2330" stroke-width="5"/>
+  <path d="M60 540h160M520 560h140M700 530h140" stroke="#a96d36" stroke-width="5" stroke-linecap="round"/>
+
+  <!-- the pencil is straight; the part under water looks shifted -->
+  <g clip-path="url(#above)"><use href="#pencil" transform="translate(420 290) rotate(28)"/></g>
+
+  <!-- glass of water -->
+  <path d="M310 300h280l-22 196H332z" fill="url(#water)" opacity=".55"/>
+  <g clip-path="url(#below)" opacity=".85"><use href="#pencil" transform="translate(486 290) rotate(14)"/></g>
+  <path d="M310 300h280l-22 196H332z" fill="#74c0fc" opacity=".22"/>
+  <path d="M310 300h280" stroke="#e7f5ff" stroke-width="6"/>
+  <path d="M290 110h320l-30 390H320z" fill="#e7f5ff" fill-opacity=".25" stroke="#2a2330" stroke-width="6" stroke-linejoin="round"/>
+  <path d="M316 140l-14 180" stroke="#fff" stroke-width="10" stroke-linecap="round" opacity=".8"/>
+</svg>

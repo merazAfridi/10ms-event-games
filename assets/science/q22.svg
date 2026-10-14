@@ -1,0 +1,49 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="900" height="600" viewBox="0 0 900 600">
+  <defs>
+    <g id="egg">
+      <ellipse cx="0" cy="0" rx="40" ry="52" fill="#f8e1c4" stroke="#2a2330" stroke-width="5"/>
+      <path d="M-20 -24q6-14 18-18" fill="none" stroke="#fff" stroke-width="7" stroke-linecap="round"/>
+    </g>
+    <g id="drop-arrow">
+      <path d="M0 0v58" stroke="#2a2330" stroke-width="5" stroke-dasharray="4 10" stroke-linecap="round"/>
+      <path d="M-12 48l12 14 12-14" fill="none" stroke="#2a2330" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
+    </g>
+  </defs>
+  <rect width="900" height="600" fill="#f4d9a6"/>
+  <rect x="0" y="480" width="900" height="120" fill="#c98a4b"/>
+  <path d="M0 480h900" stroke="#2a2330" stroke-width="5"/>
+  <path d="M40 540h160M420 560h120M690 530h170" stroke="#a96d36" stroke-width="5" stroke-linecap="round"/>
+
+  <!-- left glass: plain water -->
+  <path d="M170 230h180v248H170z" fill="#a5d8ff" opacity=".7"/>
+  <path d="M170 230h180" stroke="#e7f5ff" stroke-width="6"/>
+  <path d="M160 190h200l-10 290H170z" fill="#e7f5ff" fill-opacity=".3" stroke="#2a2330" stroke-width="6" stroke-linejoin="round"/>
+  <path d="M182 210l-4 120" stroke="#fff" stroke-width="9" stroke-linecap="round" opacity=".8"/>
+  <use href="#egg" x="260" y="70"/>
+  <use href="#drop-arrow" x="260" y="128"/>
+
+  <!-- right glass: water with salt stirred in -->
+  <path d="M540 230h180v248H540z" fill="#a5d8ff" opacity=".7"/>
+  <path d="M540 230h180" stroke="#e7f5ff" stroke-width="6"/>
+  <g fill="#fff">
+    <rect x="566" y="300" width="7" height="7" transform="rotate(20 569 303)"/>
+    <rect x="610" y="350" width="7" height="7" transform="rotate(40 613 353)"/>
+    <rect x="680" y="320" width="7" height="7" transform="rotate(10 683 323)"/>
+    <rect x="650" y="410" width="7" height="7" transform="rotate(30 653 413)"/>
+    <rect x="590" y="440" width="7" height="7"/>
+    <rect x="700" y="450" width="7" height="7" transform="rotate(45 703 453)"/>
+  </g>
+  <path d="M560 476q20-22 44-14t40-6 40 4 30 16z" fill="#fff" stroke="#ced4da" stroke-width="3"/>
+  <path d="M530 190h200l-10 290H540z" fill="#e7f5ff" fill-opacity=".3" stroke="#2a2330" stroke-width="6" stroke-linejoin="round"/>
+  <path d="M552 210l-4 120" stroke="#fff" stroke-width="9" stroke-linecap="round" opacity=".8"/>
+  <path d="M672 120l40 300" stroke="#868e96" stroke-width="8" stroke-linecap="round"/>
+  <use href="#egg" x="610" y="70"/>
+  <use href="#drop-arrow" x="610" y="128"/>
+
+  <!-- bowl of salt -->
+  <path d="M760 430h120q-8 50-60 50t-60-50z" fill="#4dabf7" stroke="#2a2330" stroke-width="5" stroke-linejoin="round"/>
+  <path d="M770 430q50-40 100 0z" fill="#fff" stroke="#2a2330" stroke-width="4" stroke-linejoin="round"/>
+  <g fill="#fff" stroke="#adb5bd" stroke-width="2">
+    <rect x="800" y="406" width="8" height="8"/><rect x="830" y="400" width="8" height="8"/><rect x="815" y="414" width="8" height="8"/>
+  </g>
+</svg>

@@ -1,0 +1,40 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="900" height="600" viewBox="0 0 900 600">
+  <defs>
+    <g id="candle">
+      <path d="M0 -70q-26 30-16 56a17 17 0 0 0 32 0q10-26-16-56z" fill="#ff922b" stroke="#2a2330" stroke-width="5" stroke-linejoin="round"/>
+      <path d="M0 -44q-12 16-6 30a7 7 0 0 0 12 0q6-14-6-30z" fill="#ffe066"/>
+      <path d="M0 -6v12" stroke="#2a2330" stroke-width="5" stroke-linecap="round"/>
+      <rect x="-26" y="6" width="52" height="104" rx="6" fill="#fff3bf" stroke="#2a2330" stroke-width="5"/>
+      <path d="M-26 22q10 10 16 0t16 4 20-6" fill="none" stroke="#2a2330" stroke-width="4"/>
+      <rect x="-50" y="108" width="100" height="16" rx="8" fill="#ced4da" stroke="#2a2330" stroke-width="5"/>
+    </g>
+    <clipPath id="b2"><ellipse cx="650" cy="210" rx="96" ry="112"/></clipPath>
+  </defs>
+  <rect width="900" height="600" fill="#6fb3b0"/>
+  <rect x="0" y="480" width="900" height="120" fill="#c98a4b"/>
+  <path d="M0 480h900" stroke="#2a2330" stroke-width="5"/>
+  <path d="M40 530h160M420 560h120M680 530h170" stroke="#a96d36" stroke-width="5" stroke-linecap="round"/>
+
+  <!-- strings -->
+  <path d="M250 0v98M650 0v98" stroke="#2a2330" stroke-width="4"/>
+
+  <!-- left: a balloon with only air -->
+  <ellipse cx="250" cy="210" rx="96" ry="112" fill="#fa5252" stroke="#2a2330" stroke-width="5"/>
+  <path d="M196 150q14-30 44-36" fill="none" stroke="#fff" stroke-width="10" stroke-linecap="round" opacity=".8"/>
+  <path d="M240 98h20l-10 -6z" fill="#2a2330"/>
+
+  <!-- right: a balloon with water inside -->
+  <ellipse cx="650" cy="210" rx="96" ry="112" fill="#d0ebff" fill-opacity=".75"/>
+  <g clip-path="url(#b2)">
+    <path d="M540 258q28-10 55 0t55 0 55 0 55 0V340H540z" fill="#339af0"/>
+    <path d="M540 258q28-10 55 0t55 0 55 0 55 0" fill="none" stroke="#e7f5ff" stroke-width="5"/>
+  </g>
+  <ellipse cx="650" cy="210" rx="96" ry="112" fill="none" stroke="#2a2330" stroke-width="5"/>
+  <path d="M596 150q14-30 44-36" fill="none" stroke="#fff" stroke-width="10" stroke-linecap="round" opacity=".9"/>
+  <path d="M640 98h20l-10 -6z" fill="#2a2330"/>
+
+  <!-- candles right under the balloons -->
+  <use href="#candle" x="250" y="366"/>
+  <use href="#candle" x="650" y="366"/>
+  <path d="M220 320q-8-10 0-20M280 320q8-10 0-20M620 320q-8-10 0-20M680 320q8-10 0-20" fill="none" stroke="#ffd43b" stroke-width="5" stroke-linecap="round"/>
+</svg>

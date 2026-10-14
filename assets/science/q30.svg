@@ -1,0 +1,33 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="900" height="600" viewBox="0 0 900 600">
+  <defs>
+    <radialGradient id="glow">
+      <stop offset="0" stop-color="#ffd43b" stop-opacity=".35"/>
+      <stop offset="1" stop-color="#ffd43b" stop-opacity="0"/>
+    </radialGradient>
+    <g id="candle">
+      <path d="M0 -70q-26 30-16 56a17 17 0 0 0 32 0q10-26-16-56z" fill="#ff922b" stroke="#2a2330" stroke-width="5" stroke-linejoin="round"/>
+      <path d="M0 -44q-12 16-6 30a7 7 0 0 0 12 0q6-14-6-30z" fill="#ffe066"/>
+      <path d="M0 -6v12" stroke="#2a2330" stroke-width="5" stroke-linecap="round"/>
+      <rect x="-30" y="6" width="60" height="150" rx="6" fill="#fff3bf" stroke="#2a2330" stroke-width="5"/>
+      <path d="M-30 24q10 10 18 0t18 4 24-6" fill="none" stroke="#2a2330" stroke-width="4"/>
+    </g>
+  </defs>
+  <rect width="900" height="600" fill="#2b3150"/>
+  <circle cx="250" cy="270" r="190" fill="url(#glow)"/>
+  <circle cx="650" cy="270" r="190" fill="url(#glow)"/>
+  <rect x="0" y="470" width="900" height="130" fill="#8b5a2b"/>
+  <path d="M0 470h900" stroke="#2a2330" stroke-width="5"/>
+  <path d="M40 530h160M400 560h140M700 520h160" stroke="#6f4520" stroke-width="5" stroke-linecap="round"/>
+
+  <!-- left: an open candle -->
+  <use href="#candle" x="250" y="316"/>
+  <rect x="190" y="466" width="120" height="14" rx="7" fill="#ced4da" stroke="#2a2330" stroke-width="5"/>
+
+  <!-- right: the same candle under an upside-down glass -->
+  <use href="#candle" x="650" y="316"/>
+  <rect x="590" y="466" width="120" height="14" rx="7" fill="#ced4da" stroke="#2a2330" stroke-width="5"/>
+  <path d="M540 470V170q0-24 24-24h172q24 0 24 24v300" fill="#e7f5ff" fill-opacity=".22" stroke="#e7f5ff" stroke-width="8" stroke-linejoin="round"/>
+  <path d="M540 470V170q0-24 24-24h172q24 0 24 24v300" fill="none" stroke="#2a2330" stroke-width="3" stroke-linejoin="round" opacity=".6"/>
+  <path d="M566 190v230" stroke="#fff" stroke-width="10" stroke-linecap="round" opacity=".7"/>
+  <path d="M520 470h260" stroke="#2a2330" stroke-width="5"/>
+</svg>

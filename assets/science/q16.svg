@@ -1,0 +1,35 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="900" height="600" viewBox="0 0 900 600">
+  <defs>
+    <linearGradient id="steel" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#f1f3f5"/>
+      <stop offset=".5" stop-color="#adb5bd"/>
+      <stop offset="1" stop-color="#dee2e6"/>
+    </linearGradient>
+    <g id="ice">
+      <rect x="-46" y="-40" width="92" height="80" rx="14" fill="#fff" fill-opacity=".9" stroke="#4dabf7" stroke-width="5"/>
+      <path d="M-30 -22h26M-30 -8h14" stroke="#a5d8ff" stroke-width="6" stroke-linecap="round"/>
+    </g>
+  </defs>
+  <!-- room -->
+  <rect width="900" height="600" fill="#6fb3b0"/>
+  <rect x="0" y="330" width="900" height="270" fill="#c98a4b"/>
+  <path d="M0 330h900" stroke="#2a2330" stroke-width="5"/>
+  <path d="M40 380h180M300 560h140M560 400h120M700 560h150" stroke="#a96d36" stroke-width="5" stroke-linecap="round"/>
+  <!-- thermometer: the room is the same for both -->
+  <rect x="428" y="60" width="44" height="200" rx="22" fill="#fff" stroke="#2a2330" stroke-width="5"/>
+  <rect x="442" y="120" width="16" height="110" rx="8" fill="#fa5252"/>
+  <circle cx="450" cy="250" r="28" fill="#fa5252" stroke="#2a2330" stroke-width="5"/>
+  <path d="M472 100h-12M472 140h-12M472 180h-12" stroke="#2a2330" stroke-width="4"/>
+
+  <!-- left: metal plate -->
+  <ellipse cx="220" cy="470" rx="190" ry="60" fill="#868e96" stroke="#2a2330" stroke-width="5"/>
+  <ellipse cx="220" cy="462" rx="166" ry="48" fill="url(#steel)" stroke="#2a2330" stroke-width="4"/>
+  <path d="M110 446q30-16 70-20" fill="none" stroke="#fff" stroke-width="8" stroke-linecap="round"/>
+  <use href="#ice" x="220" y="430"/>
+
+  <!-- right: wooden plate -->
+  <ellipse cx="680" cy="470" rx="190" ry="60" fill="#8f5524" stroke="#2a2330" stroke-width="5"/>
+  <ellipse cx="680" cy="462" rx="166" ry="48" fill="#c07a3c" stroke="#2a2330" stroke-width="4"/>
+  <path d="M560 456q60-14 120-4t110-6M580 480q50 8 100 0t100 2" fill="none" stroke="#9a5e2e" stroke-width="4" stroke-linecap="round"/>
+  <use href="#ice" x="680" y="430"/>
+</svg>

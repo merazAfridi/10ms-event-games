@@ -1,5 +1,5 @@
-/** Game 2 – English: "Verb Hunt!" (pick a level, tap every verb, 85% accuracy on that level wins). */
-import { h, haptic, icon, formatTime } from '../lib/util.js';
+/** Game 2 – English: "Verb Hunt!" (one story per game, picked at random; tap every verb, 85% accuracy wins). */
+import { h, haptic, icon, formatTime, shuffle } from '../lib/util.js';
 import { topBar, button, scoreRing, resultView } from '../lib/ui.js';
 import { showWinScreen } from '../lib/reward.js';
 import { countPlay, countWin } from '../lib/attempts.js';
@@ -63,7 +63,7 @@ export function parseLevel(level) {
   return { tokens, total: tokens.filter((t) => t.verb).length, problems };
 }
 
-const DEFAULTS = { passAccuracy: 85, timeLimitSeconds: 0 };
+const DEFAULTS = { passAccuracy: 85, timeLimitSeconds: 0, randomStory: true };
 
 export function mount(root, ctx) {
   const data = ctx.content;
@@ -76,7 +76,15 @@ export function mount(root, ctx) {
   const track = (fn) => cleanup.push(fn);
   const teardown = () => { clearInterval(timer); cleanup.forEach((fn) => fn()); cleanup = []; };
 
+  // randomStory: every game gets one story at random (never the same one twice in a row),
+  // so players can't learn the answers by watching. Otherwise players choose the level.
+  const random = Boolean(cfg.randomStory) && levels.length > 1;
   let chosen = levels[0];
+  const pickStory = () => {
+    const others = levels.filter((l) => l !== chosen);
+    chosen = shuffle(others.length ? others : levels)[0];
+  };
+  if (random) chosen = shuffle(levels)[0];
 
   intro();
 
@@ -106,7 +114,7 @@ export function mount(root, ctx) {
         h('span', { class: 'pick', 'aria-hidden': 'true' }, icon('check')),
       ),
     );
-    const single = levels.length === 1; // one story: nothing to pick
+    const single = levels.length === 1 || random; // one story (or a random one): nothing to pick
     const startBtn = button(single ? 'Start' : `Start Level ${chosen.number}`, () => start(chosen), { cls: 'big', iconName: 'next' });
     root.replaceChildren(
       topBar({ onBack: ctx.goHome }),
@@ -133,7 +141,7 @@ export function mount(root, ctx) {
     );
   }
 
-  /** A run is one level: the one the player picked. */
+  /** A run is one level: the one the player picked, or the random one. */
   function start(first = chosen) {
     teardown();
     chosen = first;
@@ -175,7 +183,7 @@ export function mount(root, ctx) {
     );
 
     const main = h('main', { class: 'scroll hunt' },
-      h('p', { class: 'level-heading' }, levels.length > 1 && `Level ${level.number} of ${levels.length} · `, h('strong', {}, level.title || '')),
+      h('p', { class: 'level-heading' }, levels.length > 1 && !random && `Level ${level.number} of ${levels.length} · `, h('strong', {}, level.title || '')),
       problems.length > 0 && h('div', { class: 'warn-card' },
         h('strong', {}, 'Answer key problem – please fix content/english.json:'),
         h('ul', {}, problems.map((p) => h('li', {}, p))),
@@ -279,7 +287,7 @@ export function mount(root, ctx) {
     const rows = run.levels.map((l) => {
       const r = run.results.find((x) => x.level === l);
       return {
-        label: `Level ${l.number} · ${l.title || ''}`,
+        label: random ? l.title || 'Story' : `Level ${l.number} · ${l.title || ''}`,
         value: r ? `${Math.max(0, r.correct - r.wrong)} / ${r.total}` : 'not played',
         ok: Boolean(r) && r.correct === r.total && !r.wrong,
       };
@@ -291,8 +299,8 @@ export function mount(root, ctx) {
         secret,
         device: countWin('english'),
         labels: { title: data.winTitle || 'Verb Hunt Complete!' },
-        rows: [...(levels.length > 1 ? rows : []), { label: 'Accuracy', value: pct(ratio), ok: true }, { label: 'Time', value: formatTime(seconds) }], // one story: its score is the accuracy
-        onPlayAgain: intro,
+        rows: [...(levels.length > 1 && !random ? rows : []), { label: 'Accuracy', value: pct(ratio), ok: true }, { label: 'Time', value: formatTime(seconds) }], // one story: its score is the accuracy
+        onPlayAgain: again,
         onHome: ctx.goHome,
         track,
       });
@@ -312,11 +320,17 @@ export function mount(root, ctx) {
             h('li', { class: r.ok ? 'ok' : '' }, h('span', {}, r.label), h('strong', {}, r.value))),
         ),
         actions: [
-          { label: 'Play Again', kind: 'primary', iconName: 'replay', onClick: intro },
+          { label: 'Play Again', kind: 'primary', iconName: 'replay', onClick: again },
           { label: 'Back to Books', kind: 'secondary', iconName: 'books', onClick: ctx.goHome },
         ],
       }),
     );
+  }
+
+  /** Back to the start screen; with random stories, the next game gets a different one. */
+  function again() {
+    if (random) pickStory();
+    intro();
   }
 
   function stat(kind, value, label) {

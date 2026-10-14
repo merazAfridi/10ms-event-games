@@ -1,5 +1,5 @@
-/** Game 3 – Math: "Shape Challenge" (draw shapes freehand, 85%+ accuracy, 2 shapes in 2 minutes). */
-import { h, html, haptic, icon, formatTime, reducedMotion } from '../lib/util.js';
+/** Game 3 – Math: "Shape Challenge" (draw shapes freehand, 85%+ accuracy, 2 of 3 random shapes in 1:30). */
+import { h, html, haptic, icon, formatTime, reducedMotion, shuffle } from '../lib/util.js';
 import { topBar, button, scoreRing, resultView } from '../lib/ui.js';
 import { scoreShape, polygonVertices } from '../lib/shape-score.js';
 import { showWinScreen } from '../lib/reward.js';
@@ -10,9 +10,10 @@ const RESULT_PAUSE = 1500; // ms the accuracy stays on screen before moving on
 const TIME_UP_GRACE = 4000; // ms a player may finish a stroke that was started before the timer hit 0
 
 const DEFAULTS = {
-  timeLimitSeconds: 120,
+  timeLimitSeconds: 90,
   shapesToWin: 2,
-  maxTries: 10, // drawings allowed per game (0 = no limit)
+  shapesPerGame: 3, // shapes picked at random from the pool each game (0 = all, in file order)
+  maxTries: 7, // drawings allowed per game (0 = no limit)
   passThreshold: 85,
   strictness: 1,
   minDrawingSize: 0.3,
@@ -36,8 +37,10 @@ export function shapeIcon(sides) {
 export function mount(root, ctx) {
   const data = ctx.content;
   const cfg = { ...DEFAULTS, ...(ctx.config.math || {}) };
-  const shapes = (data.shapes || []).filter((s) => s && (s.sides === 0 || s.sides >= 3));
-  const need = Math.max(1, Math.min(cfg.shapesToWin, shapes.length));
+  const pool = (data.shapes || []).filter((s) => s && (s.sides === 0 || s.sides >= 3));
+  const perGame = cfg.shapesPerGame > 0 ? Math.min(cfg.shapesPerGame, pool.length) : pool.length;
+  const need = Math.max(1, Math.min(cfg.shapesToWin, perGame));
+  let shapes = pool.slice(0, perGame); // this game's shapes; play() picks new ones
   const debug = cfg.showScoreDetails || /[?&]debug\b/.test(location.search + location.hash);
   const scoring = { ...cfg.advancedScoring, strictness: cfg.strictness };
 
@@ -60,7 +63,7 @@ export function mount(root, ctx) {
           h('p', { class: 'intro-sub tagline' }, data.tagline || 'Draw. Focus. Master.'),
         ),
         h('div', { class: 'shape-strip' },
-          shapes.map((s) => h('div', { class: 'shape-chip' }, shapeIcon(s.sides), h('span', {}, s.name))),
+          pool.map((s) => h('div', { class: 'shape-chip' }, shapeIcon(s.sides), h('span', {}, s.name))),
         ),
         demo(),
       ),
@@ -71,6 +74,8 @@ export function mount(root, ctx) {
   function play() {
     teardown();
     countPlay('math');
+    // A new set of shapes in a new order every game, so nobody knows what comes next.
+    shapes = cfg.shapesPerGame > 0 ? shuffle(pool).slice(0, perGame) : pool.slice();
     const st = {
       index: 0,
       completed: new Set(),
@@ -113,8 +118,9 @@ export function mount(root, ctx) {
       topBar({
         onBack: ctx.goHome,
         center: h('div', { class: 'math-chips' },
-          h('div', { class: 'chip done-chip' }, 'Completed: ', doneCount, ` / ${need}`),
-          cfg.maxTries > 0 && h('div', { class: 'chip tries-chip' }, 'Tries left: ', triesLeft),
+          // Short words on phones (see .long / .short in the CSS), so both fit next to the timer.
+          h('div', { class: 'chip done-chip' }, h('span', { class: 'long' }, 'Completed: '), h('span', { class: 'short' }, 'Done '), doneCount, ` / ${need}`),
+          cfg.maxTries > 0 && h('div', { class: 'chip tries-chip' }, h('span', { class: 'long' }, 'Tries left: '), h('span', { class: 'short' }, 'Tries '), triesLeft),
         ),
         right: timerChip,
       }),
@@ -136,8 +142,10 @@ export function mount(root, ctx) {
       const cs = getComputedStyle(padWrap);
       const innerW = padWrap.clientWidth - parseFloat(cs.paddingLeft) - parseFloat(cs.paddingRight);
       const innerH = padWrap.clientHeight - parseFloat(cs.paddingTop) - parseFloat(cs.paddingBottom);
-      // A little wider than tall: more room to the left and right of the shape.
-      const ph = Math.floor(Math.min(innerH, innerW));
+      // Big screens: a little wider than tall, more room to the left and right of the shape.
+      // Phones: a little taller than wide, since the screen is tall and narrow.
+      const tall = !document.documentElement.classList.contains('board');
+      const ph = Math.floor(Math.min(innerH, tall ? innerW * 1.2 : innerW));
       const w = Math.floor(Math.min(innerW, ph * 1.4));
       if (ph <= 0 || (w === padW && ph === padH)) return;
       padW = w;

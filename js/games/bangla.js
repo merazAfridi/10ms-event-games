@@ -15,6 +15,23 @@ const DEFAULTS = { challengesToWin: 5, timeLimitSeconds: 120, challengesPerGame:
 /** Trailing দাঁড়ি is stripped so the correct option can't be spotted by its punctuation. */
 const clean = (text) => String(text ?? '').trim().replace(/[।|.\s]+$/u, '');
 
+const MAX_PER_TYPE = 2; // questions of one type (বানান, বাগধারা …) per game, while other types are left
+
+/** The first `n` questions of `list`, skipping a type once it has MAX_PER_TYPE (topped up if types run out). */
+function pickMixed(list, n) {
+  const picked = [];
+  const rest = [];
+  const count = new Map();
+  for (const c of list) {
+    const k = c.type || '';
+    if (picked.length < n && (!c.type || (count.get(k) || 0) < MAX_PER_TYPE)) {
+      picked.push(c);
+      count.set(k, (count.get(k) || 0) + 1);
+    } else rest.push(c);
+  }
+  return picked.concat(rest).slice(0, n);
+}
+
 export function mount(root, ctx) {
   const data = ctx.content;
   const cfg = { ...DEFAULTS, ...(ctx.config.bangla || {}) };
@@ -59,7 +76,7 @@ export function mount(root, ctx) {
   function start() {
     teardown();
     countPlay('bangla');
-    const order = (cfg.shuffleChallenges ? shuffle(all) : all.slice()).slice(0, total);
+    const order = cfg.shuffleChallenges ? pickMixed(shuffle(all), total) : all.slice(0, total);
     state = { order, index: 0, score: 0, picks: [], deadline: Date.now() + limit * 1000, finished: false };
     // One clock for the whole game, top right; it stops once the last question is answered.
     state.timerText = h('span', {}, bnTime(limit));

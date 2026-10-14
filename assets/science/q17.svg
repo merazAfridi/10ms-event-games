@@ -1,0 +1,34 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="900" height="600" viewBox="0 0 900 600">
+  <defs>
+    <radialGradient id="redlight" cx="0.5" cy="0" r="1">
+      <stop offset="0" stop-color="#ff6b6b" stop-opacity=".95"/>
+      <stop offset="1" stop-color="#ff6b6b" stop-opacity=".25"/>
+    </radialGradient>
+    <g id="leaf">
+      <path d="M0 110C-80 60 -70 -50 0 -110C70 -50 80 60 0 110z" stroke-width="6" stroke-linejoin="round"/>
+      <path d="M0 104V-96M0 40l-34-30M0 40l34-30M0 -10l-30-28M0 -10l30-28M0 -56l-20-20M0 -56l20-20" fill="none" stroke-width="5" stroke-linecap="round"/>
+      <path d="M0 110v40" fill="none" stroke-width="8" stroke-linecap="round"/>
+    </g>
+  </defs>
+
+  <!-- left: the leaf in sunlight -->
+  <rect width="450" height="600" fill="#cdeefb"/>
+  <circle cx="90" cy="90" r="46" fill="#ffe066" stroke="#fab005" stroke-width="6"/>
+  <path d="M90 20v-14M90 160v14M20 90H6M160 90h14M40 40l-10-10M140 140l10 10M140 40l10-10M40 140l-10 10" stroke="#fab005" stroke-width="6" stroke-linecap="round"/>
+  <rect x="0" y="500" width="450" height="100" fill="#d8c3a5"/>
+  <use href="#leaf" x="250" y="320" fill="#51cf66" stroke="#2b8a3e"/>
+
+  <rect x="446" y="0" width="8" height="600" fill="#fff"/>
+
+  <!-- right: a dark room lit only by a red lamp -->
+  <rect x="454" width="446" height="600" fill="#1d1a2b"/>
+  <path d="M676 0v70" stroke="#495057" stroke-width="6"/>
+  <path d="M630 70h92l26 54H604z" fill="#343a40" stroke="#0b0a12" stroke-width="5" stroke-linejoin="round"/>
+  <path d="M612 124h128L860 600H492z" fill="url(#redlight)" opacity=".55"/>
+  <ellipse cx="676" cy="126" rx="38" ry="10" fill="#ff8787"/>
+  <rect x="454" y="500" width="446" height="100" fill="#3b1e26"/>
+  <!-- what colour will this leaf look? -->
+  <use href="#leaf" x="676" y="320" fill="none" stroke="#fff" stroke-dasharray="14 10"/>
+  <circle cx="676" cy="300" r="42" fill="#fff" stroke="#2a2330" stroke-width="5"/>
+  <text x="676" y="320" font-family="Arial, Helvetica, sans-serif" font-size="58" font-weight="700" text-anchor="middle" fill="#c92a2a">?</text>
+</svg>

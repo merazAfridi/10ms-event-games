@@ -1,5 +1,5 @@
 {
-  "_help": "Shape Challenge content. 'shapes' is the order players see. 'sides' is 0 for a circle, otherwise the number of sides of a regular polygon (3 = triangle, 4 = square, 5 = pentagon ...). Timer, pass mark and difficulty live in config.json.",
+  "_help": "Shape Challenge content. 'shapes' is the pool: every game picks a few of them at random, in a random order (config.json > math > shapesPerGame). 'sides' is 0 for a circle, otherwise the number of sides of a regular polygon (3 = triangle, 4 = square, 5 = pentagon ...). Timer, pass mark and difficulty live in config.json.",
 
   "title": "Shape Challenge",
   "tagline": "Draw. Focus. Master.",
@@ -16,6 +16,8 @@
 
   "shapes": [
     { "name": "Circle", "sides": 0 },
+    { "name": "Triangle", "sides": 3 },
+    { "name": "Square", "sides": 4 },
     { "name": "Pentagon", "sides": 5 },
     { "name": "Hexagon", "sides": 6 }
   ]

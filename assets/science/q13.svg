@@ -1,0 +1,46 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="900" height="600" viewBox="0 0 900 600">
+  <defs>
+    <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#7cc7ef"/>
+      <stop offset="1" stop-color="#d4f0fb"/>
+    </linearGradient>
+    <linearGradient id="sea" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#4dabf7"/>
+      <stop offset="1" stop-color="#1864ab"/>
+    </linearGradient>
+  </defs>
+  <rect width="900" height="600" fill="url(#sky)"/>
+  <ellipse cx="160" cy="90" rx="80" ry="26" fill="#fff" opacity=".9"/>
+  <ellipse cx="220" cy="70" rx="56" ry="26" fill="#fff" opacity=".9"/>
+  <circle cx="800" cy="80" r="40" fill="#ffe066" stroke="#fab005" stroke-width="6"/>
+
+  <!-- the iron ship: floats -->
+  <rect x="560" y="170" width="26" height="70" rx="4" fill="#e03131" stroke="#2a2330" stroke-width="5"/>
+  <rect x="610" y="186" width="26" height="54" rx="4" fill="#e03131" stroke="#2a2330" stroke-width="5"/>
+  <path d="M556 182h34M606 196h34" stroke="#2a2330" stroke-width="5"/>
+  <rect x="530" y="236" width="170" height="54" rx="8" fill="#f8f9fa" stroke="#2a2330" stroke-width="5"/>
+  <circle cx="564" cy="262" r="9" fill="#74c0fc" stroke="#2a2330" stroke-width="4"/>
+  <circle cx="600" cy="262" r="9" fill="#74c0fc" stroke="#2a2330" stroke-width="4"/>
+  <circle cx="636" cy="262" r="9" fill="#74c0fc" stroke="#2a2330" stroke-width="4"/>
+  <circle cx="672" cy="262" r="9" fill="#74c0fc" stroke="#2a2330" stroke-width="4"/>
+  <path d="M430 286h400l-48 92H486z" fill="#495057" stroke="#2a2330" stroke-width="5" stroke-linejoin="round"/>
+  <path d="M440 306h380" stroke="#e03131" stroke-width="10"/>
+
+  <!-- water (cross-section) -->
+  <path d="M0 330q37-14 75 0t75 0 75 0 75 0 75 0 75 0 75 0 75 0 75 0 75 0 75 0 75 0V600H0z" fill="url(#sea)" opacity=".8"/>
+  <path d="M0 330q37-14 75 0t75 0 75 0 75 0 75 0 75 0 75 0 75 0 75 0 75 0 75 0 75 0" fill="none" stroke="#e7f5ff" stroke-width="6"/>
+  <path d="M436 330l50 48h296l46-48" fill="#495057" opacity=".45" stroke="#2a2330" stroke-width="5" stroke-linejoin="round"/>
+  <path d="M60 420h60M200 470h50M700 450h60M560 520h70M320 540h50" stroke="#a5d8ff" stroke-width="5" stroke-linecap="round" opacity=".7"/>
+  <rect x="0" y="560" width="900" height="40" fill="#d9b779"/>
+  <path d="M0 560q100-10 200 0t200 0 200 0 300 0" fill="none" stroke="#2a2330" stroke-width="4"/>
+
+  <!-- the iron nail: on the bottom -->
+  <g transform="rotate(-14 200 548)">
+    <rect x="120" y="540" width="150" height="14" rx="3" fill="#868e96" stroke="#2a2330" stroke-width="5"/>
+    <path d="M270 540l30 7-30 7z" fill="#868e96" stroke="#2a2330" stroke-width="5" stroke-linejoin="round"/>
+    <rect x="108" y="528" width="16" height="38" rx="4" fill="#868e96" stroke="#2a2330" stroke-width="5"/>
+  </g>
+  <circle cx="220" cy="470" r="6" fill="none" stroke="#e7f5ff" stroke-width="3"/>
+  <circle cx="232" cy="440" r="4" fill="none" stroke="#e7f5ff" stroke-width="3"/>
+  <circle cx="214" cy="414" r="5" fill="none" stroke="#e7f5ff" stroke-width="3"/>
+</svg>

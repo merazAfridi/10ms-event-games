@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="900" height="600" viewBox="0 0 900 600">
+  <defs>
+    <g id="nail">
+      <rect x="-7" y="-110" width="14" height="190" rx="3" fill="#adb5bd" stroke="#2a2330" stroke-width="5"/>
+      <path d="M-7 80l7 26 7-26z" fill="#adb5bd" stroke="#2a2330" stroke-width="5" stroke-linejoin="round"/>
+      <rect x="-24" y="-124" width="48" height="16" rx="5" fill="#adb5bd" stroke="#2a2330" stroke-width="5"/>
+      <path d="M-2 -100v160" stroke="#f1f3f5" stroke-width="4"/>
+    </g>
+    <g id="jar">
+      <path d="M-110 -170h220v20q20 10 20 40v230q0 30-30 30h-200q-30 0-30-30v-230q0-30 20-40z" fill="#e7f5ff" fill-opacity=".35" stroke="#2a2330" stroke-width="6" stroke-linejoin="round"/>
+      <path d="M-100 -120v190" stroke="#fff" stroke-width="10" stroke-linecap="round" opacity=".8"/>
+    </g>
+  </defs>
+  <rect width="900" height="600" fill="#f4d9a6"/>
+  <rect x="0" y="480" width="900" height="120" fill="#c98a4b"/>
+  <path d="M0 480h900" stroke="#2a2330" stroke-width="5"/>
+  <path d="M40 540h160M400 560h140M700 530h160" stroke="#a96d36" stroke-width="5" stroke-linecap="round"/>
+
+  <!-- left: a dry jar -->
+  <use href="#nail" x="250" y="340" transform="rotate(14 250 340)"/>
+  <use href="#jar" x="250" y="330"/>
+
+  <!-- right: a jar with some water -->
+  <path d="M540 340h220v120q0 18-18 18H558q-18 0-18-18z" fill="#74c0fc" opacity=".6"/>
+  <path d="M540 340h220" stroke="#e7f5ff" stroke-width="6"/>
+  <use href="#nail" x="650" y="340" transform="rotate(14 650 340)"/>
+  <path d="M540 340h220v120q0 18-18 18H558q-18 0-18-18z" fill="#74c0fc" opacity=".25"/>
+  <use href="#jar" x="650" y="330"/>
+</svg>

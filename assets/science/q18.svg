@@ -1,0 +1,58 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="900" height="600" viewBox="0 0 900 600">
+  <defs>
+    <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#7cc7ef"/>
+      <stop offset="1" stop-color="#d4f0fb"/>
+    </linearGradient>
+  </defs>
+  <rect width="900" height="600" fill="url(#sky)"/>
+  <circle cx="800" cy="80" r="44" fill="#ffe066" stroke="#fab005" stroke-width="6"/>
+  <path d="M800 10v-8M800 150v8M730 80h-8M870 80h8M750 30l-6-6M850 130l6 6M850 30l6-6M750 130l-6 6" stroke="#fab005" stroke-width="6" stroke-linecap="round"/>
+  <path d="M0 250q150-40 300-10t300 0 300-10V600H0z" fill="#8ccf74"/>
+
+  <!-- gravel bed -->
+  <path d="M0 330h900v270H0z" fill="#a8a29a"/>
+  <path d="M0 330h900" stroke="#2a2330" stroke-width="5"/>
+  <g fill="#8a847c">
+    <circle cx="60" cy="580" r="7"/><circle cx="210" cy="350" r="6"/><circle cx="380" cy="590" r="7"/>
+    <circle cx="560" cy="345" r="6"/><circle cx="720" cy="585" r="7"/><circle cx="850" cy="352" r="6"/>
+  </g>
+
+  <!-- sleepers -->
+  <g fill="#8b5a2b" stroke="#2a2330" stroke-width="5">
+    <rect x="40" y="350" width="60" height="230" rx="6"/>
+    <rect x="200" y="350" width="60" height="230" rx="6"/>
+    <rect x="360" y="350" width="60" height="230" rx="6"/>
+    <rect x="520" y="350" width="60" height="230" rx="6"/>
+    <rect x="680" y="350" width="60" height="230" rx="6"/>
+    <rect x="840" y="350" width="60" height="230" rx="6"/>
+  </g>
+
+  <!-- two rails, each with a small gap at the joint -->
+  <g fill="#adb5bd" stroke="#2a2330" stroke-width="5">
+    <rect x="-10" y="384" width="452" height="34" rx="4"/>
+    <rect x="462" y="384" width="452" height="34" rx="4"/>
+    <rect x="-10" y="500" width="452" height="34" rx="4"/>
+    <rect x="462" y="500" width="452" height="34" rx="4"/>
+  </g>
+  <path d="M0 392h432M472 392h428M0 508h432M472 508h428" stroke="#f1f3f5" stroke-width="5"/>
+  <!-- joint plates and bolts -->
+  <g fill="#868e96" stroke="#2a2330" stroke-width="4">
+    <rect x="400" y="420" width="104" height="18" rx="4"/>
+    <rect x="400" y="536" width="104" height="18" rx="4"/>
+  </g>
+
+  <!-- magnifier on the gap -->
+  <path d="M452 322v58" stroke="#2a2330" stroke-width="5" stroke-dasharray="6 8"/>
+  <circle cx="452" cy="220" r="100" fill="#fff" stroke="#2a2330" stroke-width="8"/>
+  <clipPath id="lens"><circle cx="452" cy="220" r="96"/></clipPath>
+  <g clip-path="url(#lens)">
+    <rect x="340" y="232" width="230" height="90" fill="#a8a29a"/>
+    <rect x="330" y="196" width="106" height="62" rx="4" fill="#adb5bd" stroke="#2a2330" stroke-width="6"/>
+    <rect x="468" y="196" width="106" height="62" rx="4" fill="#adb5bd" stroke="#2a2330" stroke-width="6"/>
+    <path d="M330 210h106M468 210h106" stroke="#f1f3f5" stroke-width="7"/>
+  </g>
+  <path d="M452 136v42" stroke="#c92a2a" stroke-width="8" stroke-linecap="round"/>
+  <path d="M438 166l14 14 14-14" fill="none" stroke="#c92a2a" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M523 291l50 50" stroke="#2a2330" stroke-width="20" stroke-linecap="round"/>
+</svg>

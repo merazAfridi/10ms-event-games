@@ -1,0 +1,32 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="900" height="600" viewBox="0 0 900 600">
+  <defs>
+    <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#7cc7ef"/>
+      <stop offset="1" stop-color="#fff1d6"/>
+    </linearGradient>
+    <g id="rays" stroke-width="6" stroke-linecap="round">
+      <path d="M0 -58v-14M0 58v14M-58 0h-14M58 0h14M-41 -41l-10 -10M41 41l10 10M41 -41l10 -10M-41 41l-10 10"/>
+    </g>
+  </defs>
+  <rect width="900" height="600" fill="url(#sky)"/>
+
+  <!-- the sun's path across the sky -->
+  <path d="M110 400Q450 -150 790 400" fill="none" stroke="#fff" stroke-width="5" stroke-dasharray="6 14" stroke-linecap="round"/>
+
+  <!-- morning sun (left, low) -->
+  <circle cx="130" cy="350" r="42" fill="#ffc078" stroke="#f76707" stroke-width="6"/>
+  <use href="#rays" x="130" y="350" stroke="#f76707" transform="translate(130 350) scale(.75) translate(-130 -350)"/>
+  <!-- noon sun (high) -->
+  <circle cx="450" cy="120" r="46" fill="#ffe066" stroke="#fab005" stroke-width="6"/>
+  <use href="#rays" x="450" y="120" stroke="#fab005"/>
+  <!-- evening sun (right, low) -->
+  <circle cx="770" cy="350" r="42" fill="#ffa8a8" stroke="#e8590c" stroke-width="6"/>
+  <use href="#rays" x="770" y="350" stroke="#e8590c" transform="translate(770 350) scale(.75) translate(-770 -350)"/>
+
+  <!-- ground and one tree -->
+  <path d="M0 470q225-20 450 0t450 0V600H0z" fill="#82c96c" stroke="#2a2330" stroke-width="5" stroke-linejoin="round"/>
+  <path d="M0 530q225-14 450 0t450 0V600H0z" fill="#6cb85a"/>
+  <rect x="436" y="350" width="28" height="124" rx="6" fill="#a0673a" stroke="#2a2330" stroke-width="5"/>
+  <circle cx="450" cy="320" r="64" fill="#5fb85a" stroke="#2a2330" stroke-width="5"/>
+  <circle cx="418" cy="300" r="14" fill="#7ad36f"/>
+</svg>

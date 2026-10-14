@@ -1,5 +1,5 @@
 /**
- * Book of Games – app shell (smartboard).
+ * Book of Games – app shell (smartboard first, phones too).
  * Book shelf, book open/close animation, hash router (#/bangla, #/english, #/math, #/verify),
  * screen-filling stage, content loading and service-worker registration.
  */
@@ -35,14 +35,22 @@ const gameName = (book) => content[book.id]?.title || book.title;
 
 // ---------------------------------------------------------------- stage
 
-// The whole app is laid out at 1600×900 and scaled up to fill the screen, so a 4K smartboard
-// shows the same layout as a 1080p one, only sharper. The stage takes the screen's shape,
-// so a board that isn't exactly 16:9 is filled edge to edge without cutting anything off.
+// Big landscape screens (the smartboard, laptops, landscape tablets) get a stage laid out at
+// 1600×900 and scaled to fill the screen, so a 4K board shows the same layout as a 1080p one,
+// only sharper. The stage takes the screen's shape, so nothing is cut off.
+// Phones and upright tablets get the phone layout at their own size instead.
 const STAGE_W = 1600;
 const STAGE_H = 900;
+const boardQuery = window.matchMedia('(orientation: landscape) and (min-width: 900px) and (min-height: 520px)');
+const isBoard = () => boardQuery.matches;
 
 function fitStage() {
   const root = document.documentElement;
+  root.classList.toggle('board', isBoard());
+  if (!isBoard()) {
+    ['--stage-k', '--stage-w', '--stage-h'].forEach((v) => root.style.removeProperty(v));
+    return;
+  }
   const k = Math.min(window.innerWidth / STAGE_W, window.innerHeight / STAGE_H);
   root.style.setProperty('--stage-k', String(k));
   root.style.setProperty('--stage-w', `${window.innerWidth / k}px`);

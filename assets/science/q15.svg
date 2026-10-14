@@ -1,0 +1,50 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="900" height="600" viewBox="0 0 900 600">
+  <defs>
+    <linearGradient id="water" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#a5d8ff"/>
+      <stop offset="1" stop-color="#74c0fc"/>
+    </linearGradient>
+    <g id="drop">
+      <path d="M0 -14q9 12 9 20a9 9 0 0 1-18 0q0-8 9-20z" fill="#e7f5ff" stroke="#1c7ed6" stroke-width="3"/>
+      <path d="M-3 4a4 4 0 0 0 3 4" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round"/>
+    </g>
+  </defs>
+  <!-- warm room, wooden table -->
+  <rect width="900" height="600" fill="#f4d9a6"/>
+  <rect x="640" y="60" width="200" height="200" rx="10" fill="#bfe6f7" stroke="#2a2330" stroke-width="5"/>
+  <path d="M740 60v200M640 160h200" stroke="#2a2330" stroke-width="5"/>
+  <circle cx="790" cy="110" r="26" fill="#ffe066"/>
+  <rect x="0" y="440" width="900" height="160" fill="#c98a4b"/>
+  <path d="M0 440h900" stroke="#2a2330" stroke-width="5"/>
+  <path d="M60 490h160M320 540h140M560 500h120M700 560h140" stroke="#a96d36" stroke-width="5" stroke-linecap="round"/>
+
+  <!-- small puddle on the table -->
+  <ellipse cx="420" cy="470" rx="150" ry="18" fill="#a5d8ff" opacity=".7"/>
+
+  <!-- cold glass with ice -->
+  <path d="M310 130h220l-24 330H334z" fill="#e7f5ff" fill-opacity=".55" stroke="#2a2330" stroke-width="6" stroke-linejoin="round"/>
+  <path d="M318 210h204l-18 246H336z" fill="url(#water)" opacity=".85"/>
+  <rect x="350" y="190" width="62" height="58" rx="10" fill="#fff" fill-opacity=".85" stroke="#4dabf7" stroke-width="4" transform="rotate(-12 381 219)"/>
+  <rect x="428" y="200" width="62" height="58" rx="10" fill="#fff" fill-opacity=".85" stroke="#4dabf7" stroke-width="4" transform="rotate(10 459 229)"/>
+  <rect x="384" y="270" width="58" height="54" rx="10" fill="#fff" fill-opacity=".8" stroke="#4dabf7" stroke-width="4" transform="rotate(6 413 297)"/>
+  <path d="M332 150l-6 90" stroke="#fff" stroke-width="8" stroke-linecap="round" opacity=".8"/>
+
+  <!-- water drops on the OUTSIDE of the glass -->
+  <use href="#drop" x="330" y="190"/>
+  <use href="#drop" x="356" y="300"/>
+  <use href="#drop" x="342" y="380"/>
+  <use href="#drop" x="470" y="160"/>
+  <use href="#drop" x="508" y="250"/>
+  <use href="#drop" x="494" y="350"/>
+  <use href="#drop" x="420" y="410"/>
+  <use href="#drop" x="388" y="160"/>
+  <use href="#drop" x="460" y="320"/>
+  <use href="#drop" x="316" y="250"/>
+  <use href="#drop" x="526" y="200"/>
+  <use href="#drop" x="324" y="350"/>
+  <use href="#drop" x="514" y="390"/>
+  <path d="M324 366l4 60M514 406l-2 44" stroke="#4dabf7" stroke-width="5" stroke-linecap="round"/>
+
+  <!-- cold lines -->
+  <path d="M250 200q-20 20 0 40t0 40M590 220q20 20 0 40t0 40" fill="none" stroke="#4dabf7" stroke-width="6" stroke-linecap="round"/>
+</svg>

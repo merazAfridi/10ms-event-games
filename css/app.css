@@ -107,17 +107,41 @@ button { font: inherit; color: inherit; cursor: pointer; }
 img { -webkit-user-drag: none; }
 [hidden] { display: none !important; }
 
-/* The stage: laid out at 1600×900 (or a little wider/taller to match the screen's shape),
-   then scaled to fill the screen. app.js sets the three variables. */
+/* Phones: the app fills the screen at its own size. */
 #app {
   position: fixed;
   top: 0;
   left: 0;
-  width: var(--stage-w, 100vw);
-  height: var(--stage-h, 100vh);
+  right: 0;
+  margin: 0 auto;
+  width: 100%;
+  max-width: 560px;
+  height: 100vh;
+  height: 100dvh;
   overflow: hidden;
   background: var(--night-2);
   isolation: isolate;
+}
+/* Upright tablets: a centred phone-sized column. */
+@media (min-width: 600px) {
+  body {
+    background:
+      radial-gradient(circle at 20% 10%, rgba(108, 76, 214, .25), transparent 40%),
+      radial-gradient(circle at 80% 90%, rgba(246, 196, 83, .12), transparent 40%),
+      #0c0a22;
+  }
+  #app { box-shadow: 0 0 0 1px rgba(255, 255, 255, .06), 0 30px 90px rgba(0, 0, 0, .55); }
+}
+
+/* Big screens: the stage is laid out at 1600×900 (or a little wider/taller to match the
+   screen's shape), then scaled to fill the screen. app.js sets the three variables. */
+.board #app {
+  right: auto;
+  margin: 0;
+  max-width: none;
+  width: var(--stage-w, 100vw);
+  height: var(--stage-h, 100vh);
+  box-shadow: none;
   transform: scale(var(--stage-k, 1));
   transform-origin: 0 0;
 }
@@ -183,7 +207,7 @@ body:not(.ready) #home::after {
   flex-direction: column;
   align-items: center;
   text-align: center;
-  padding: 64px 24px 0;
+  padding: clamp(18px, 5vh, 56px) 24px 0;
 }
 .home-head::after {
   content: '';
@@ -218,18 +242,57 @@ body:not(.ready) #home::after {
   overflow-wrap: anywhere;
 }
 
-/* ---------- Shelf: all four books in one row ---------- */
+/* ---------- Shelf: two rows of two on phones, all four in one row on big screens ---------- */
 .shelf {
-  --book-w: 300px;
+  /* as wide as two columns allow, but short enough that both rows fit the screen's height */
+  --book-w: min(calc((100vw - 72px) / 2), 210px, calc((100vh - 400px) * .36));
   position: relative;
   flex: 1 1 auto;
   min-height: 0;
-  display: flex;
-  align-items: center;
+  display: grid;
+  grid-template-columns: repeat(2, var(--book-w));
   justify-content: center;
-  gap: 80px;
-  padding: 0 0 24px;
+  align-content: center;
+  gap: 22px 32px;
+  padding: 8px 0 16px;
 }
+
+/* Phones: a compact header and labels, so the books can be as big as possible. Book size =
+   the smaller of half the width and what fits two rows into the height (book + label);
+   never smaller than 118px. A very short screen scrolls instead of shrinking the books more. */
+:root:not(.board) .home { overflow-y: auto; overscroll-behavior: contain; }
+:root:not(.board) .home-head { padding-top: clamp(14px, 4vh, 44px); }
+:root:not(.board) .home-head::after { margin-top: 10px; }
+:root:not(.board) .brand-logo { height: 26px; margin-bottom: 10px; }
+:root:not(.board) .event-name { font-size: clamp(22px, 6.6vw, 32px); }
+:root:not(.board) .shelf {
+  --fit-h: calc((100vh - var(--safe-t) - var(--safe-b) - 4vh - 172px) / 2 - 84px); /* header ≈ 82px + 4vh, footer 40px, gaps 50px; label 84px */
+  --book-w: max(118px, min(calc((min(100vw, 560px) - 72px) / 2), 210px, calc(var(--fit-h) * .75)));
+  flex: 1 0 auto;
+  gap: 18px 32px;
+}
+@supports (height: 100dvh) {
+  :root:not(.board) .shelf { --fit-h: calc((100dvh - var(--safe-t) - var(--safe-b) - 4dvh - 172px) / 2 - 84px); }
+}
+:root:not(.board) .book-label { margin-top: 12px; }
+:root:not(.board) .book-label strong { font-size: 18px; }
+:root:not(.board) .book-label strong:lang(bn) { font-size: 20px; line-height: 1.15; }
+:root:not(.board) .book-label span { font-size: 12px; }
+:root:not(.board) .book-label .book-level { margin-top: 5px; padding: 2px 10px; font-size: 11px; }
+
+/* Phones: the question picture is capped so all 4 answers fit below it without scrolling. */
+:root:not(.board) .picture-quiz .q-image {
+  width: auto;
+  max-width: 100%;
+  max-height: max(140px, calc(100vh - var(--safe-t) - var(--safe-b) - 460px));
+  margin: 0 auto;
+  object-fit: contain;
+}
+@supports (height: 100dvh) {
+  :root:not(.board) .picture-quiz .q-image { max-height: max(140px, calc(100dvh - var(--safe-t) - var(--safe-b) - 460px)); }
+}
+:root:not(.board) .picture-quiz .option { min-height: 54px; padding-top: 8px; padding-bottom: 8px; }
+:root:not(.board) .picture-quiz .q-title { font-size: 24px; }
 
 .book-slot {
   flex: 0 0 var(--book-w);
@@ -312,28 +375,28 @@ body:not(.ready) #home::after {
 .book-slot.is-lifted .book-shadow { visibility: hidden; }
 
 .book-label {
-  margin-top: 34px;
+  margin-top: 20px;
   text-align: center;
 }
 .book-label strong {
   display: block;
-  font: 700 24px/1.2 var(--display);
+  font: 700 20px/1.2 var(--display);
   color: #fff;
 }
-.book-label strong:lang(bn) { font-family: var(--font); font-size: 26px; }
+.book-label strong:lang(bn) { font-family: var(--font); font-size: 22px; }
 .book-label span {
   display: block;
-  margin-top: 2px;
-  font-size: 15px;
+  margin-top: 1px;
+  font-size: 13px;
   color: rgba(255, 246, 226, .75);
 }
 /* Difficulty pill under each subject: green = Easy, red = Hard. */
 .book-label .book-level {
   display: inline-block;
-  margin-top: 10px;
-  padding: 4px 14px;
+  margin-top: 7px;
+  padding: 3px 12px;
   border-radius: 999px;
-  font: 700 14px/1.2 var(--display);
+  font: 700 12px/1.2 var(--display);
   letter-spacing: .08em;
   text-transform: uppercase;
   color: #fff;
@@ -907,26 +970,33 @@ body:not(.ready) #home::after {
 /* =====================================================================
    MATH – Shape Challenge
    ===================================================================== */
-.shape-strip { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 16px; }
+.shape-strip { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 6px; margin-bottom: 16px; }
 .shape-chip {
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: 4px;
-  padding: 10px 4px 8px;
+  padding: 8px 2px 6px;
   background: var(--card);
   border: 1px solid var(--line);
-  border-radius: 16px;
-  font-size: 14px;
+  border-radius: 14px;
+  font-size: 12px;
   font-weight: 600;
 }
-.shape-chip .shape-icon { width: 40px; height: 40px; }
+.shape-chip .shape-icon { width: 34px; height: 34px; }
 .shape-icon { display: block; fill: none; stroke: var(--accent); stroke-width: 6; stroke-linejoin: round; }
 
 .timer.low { background: var(--bad-soft); color: var(--bad); animation: pulse 1s ease-in-out infinite; }
 .topbar .timer { font-size: 18px; }
 .topbar .timer svg { width: 20px; height: 20px; }
 .done-chip { font-size: 14px; padding: 6px 11px; }
+.math-chips { display: flex; gap: 6px; }
+.math-chips .chip { white-space: nowrap; }
+.chip .short { display: none; }
+:root:not(.board) .math-chips .chip { padding: 6px 10px; font-size: 13px; }
+:root:not(.board) .math-chips .chip strong { font-size: 16px; }
+:root:not(.board) .chip .long { display: none; }
+:root:not(.board) .chip .short { display: inline; }
 
 .target { flex: none; display: flex; align-items: center; gap: 12px; padding: 4px 18px 2px; }
 .target.swap { animation: rise .4s ease-out; }
@@ -945,6 +1015,9 @@ body:not(.ready) #home::after {
 .target-meta { flex: none; max-width: 92px; font-size: 13px; line-height: 1.3; text-align: right; color: var(--ink-2); }
 
 .pad-wrap { flex: 1 1 auto; min-height: 0; display: grid; place-items: center; padding: 10px 16px; }
+:root:not(.board) .math-stage { flex: 1 1 auto; min-height: 0; display: grid; grid-template-columns: minmax(0, 1fr) auto; grid-template-rows: auto minmax(0, 1fr); align-items: center; }
+:root:not(.board) .math-stage .pad-wrap { grid-row: 2; grid-column: 1 / -1; height: 100%; place-items: start center; }
+:root:not(.board) .math-stage .target-meta { grid-row: 1; grid-column: 2; max-width: 130px; padding-right: 18px; font-weight: 700; color: var(--accent-ink); }
 .pad-box {
   position: relative;
   width: 280px;
@@ -1154,6 +1227,8 @@ body:not(.ready) #home::after {
    stage 2.4× bigger, pixel-sharp.
    ===================================================================== */
 /* ---------- Home ---------- */
+.board .home-head { padding-top: 64px; }
+.board .shelf { --book-w: 300px; display: flex; align-items: center; gap: 80px; padding: 0 0 24px; }
 .board .home-head::after { width: 64px; height: 4px; margin-top: 20px; }
 .board .brand-logo { height: 46px; margin-bottom: 20px; }
 .board .event-name { font-size: 50px; }
@@ -1316,9 +1391,9 @@ body:not(.ready) #home::after {
 }
 .bangla-quiz .option.is-wrong .opt-letter { opacity: .5; }
 .bangla-quiz .option.is-wrong .opt-mark, .bangla-quiz .option.is-wrong:not(.pic-option) .opt-mark { color: var(--bad); }
-.board .pic-option.is-wrong { border-color: color-mix(in srgb, var(--c1) 35%, #f4efe6); }
-.board .pic-option.is-wrong .opt-img { opacity: .35; filter: grayscale(.5); }
-.board .pic-option.is-wrong .opt-mark { background: var(--bad); color: #fff; }
+.pic-option.is-wrong { border-color: color-mix(in srgb, var(--c1) 35%, #f4efe6); }
+.pic-option.is-wrong .opt-img { opacity: .35; filter: grayscale(.5); }
+.bangla-quiz .pic-option.is-wrong .opt-mark { background: var(--bad); color: #fff; }
 .bangla-quiz .option.is-dim { opacity: .35; filter: grayscale(.5); }
 .bangla-quiz .option { transition: transform .15s, box-shadow .15s, opacity .25s, filter .25s; }
 @media (hover: hover) {
@@ -1341,14 +1416,19 @@ body:not(.ready) #home::after {
 .bangla-quiz .option:not(.pic-option) .opt-letter { background: #fff; color: var(--c2); text-shadow: none; box-shadow: 0 3px 0 rgba(0, 0, 0, .15); }
 .bangla-quiz .option:not(.pic-option) .opt-mark { color: #fff; }
 
-.board .pic-stage .options { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 36px; align-items: start; padding-left: 12px; }
-.board .pic-option { position: relative; display: block; padding: 8px; border: 6px solid var(--c1); border-radius: 24px; background: #fff; box-shadow: 0 6px 0 var(--edge), 0 14px 24px rgba(40, 30, 20, .16); }
-.board .pic-option.is-correct { border-color: var(--c1); background: #fff; }
-.board .pic-option.is-wrong { background: #fff; }
-.board .opt-img { display: block; width: 100%; max-height: 330px; object-fit: contain; border-radius: 14px; background: #fff; }
-.board .pic-option .opt-letter { position: absolute; top: -24px; left: -24px; z-index: 1; width: 60px; height: 60px; margin: 0; border: 4px solid #fff; border-radius: 50%; background: var(--c1); color: #fff; font-size: 27px; box-shadow: 0 3px 0 var(--edge); } /* on the frame's corner, clear of faces */
-.board .pic-option .opt-mark { position: absolute; top: 18px; right: 18px; width: 52px; height: 52px; padding: 6px; border-radius: 50%; background: var(--c1); color: #fff; }
-.board .pic-option .opt-mark:empty { display: none; }
+.pic-stage .options { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 22px 18px; align-items: start; padding: 12px 4px 0 10px; }
+.pic-option { position: relative; display: block; min-height: 0; padding: 5px; border: 4px solid var(--c1); border-radius: 18px; background: #fff; box-shadow: 0 5px 0 var(--edge), 0 10px 18px rgba(40, 30, 20, .14); }
+.pic-option.is-correct { border-color: var(--c1); background: #fff; }
+.pic-option.is-wrong { background: #fff; }
+.opt-img { display: block; width: 100%; max-height: calc((100vh - 330px) / 2); object-fit: contain; border-radius: 12px; background: #fff; }
+.pic-option .opt-letter { position: absolute; top: -13px; left: -13px; z-index: 1; width: 40px; height: 40px; margin: 0; border: 3px solid #fff; border-radius: 50%; background: var(--c1); color: #fff; font-size: 19px; box-shadow: 0 3px 0 var(--edge); } /* on the frame's corner, clear of faces */
+.pic-option .opt-mark { position: absolute; top: 10px; right: 10px; width: 36px; height: 36px; padding: 5px; border-radius: 50%; background: var(--c1); color: #fff; }
+.pic-option .opt-mark:empty { display: none; }
+.board .pic-stage .options { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 36px; padding: 0 0 0 12px; }
+.board .pic-option { padding: 8px; border-width: 6px; border-radius: 24px; box-shadow: 0 6px 0 var(--edge), 0 14px 24px rgba(40, 30, 20, .16); }
+.board .opt-img { max-height: 330px; border-radius: 14px; }
+.board .pic-option .opt-letter { top: -24px; left: -24px; width: 60px; height: 60px; border-width: 4px; font-size: 27px; }
+.board .pic-option .opt-mark { top: 18px; right: 18px; width: 52px; height: 52px; padding: 6px; }
 .board .stage-quiz .feedback { max-width: 1100px; margin: 20px auto 0; text-align: center; }
 .board .stage-quiz .fb-verdict { justify-content: center; }
 
@@ -1476,6 +1556,18 @@ body:not(.ready) #home::after {
 
 .dm-end { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 16px; text-align: center; animation: pop-in .4s cubic-bezier(.2, 1.4, .4, 1) both; }
 .dm-end strong { font-size: 36px; line-height: 1.3; }
+/* Phones: the same demo, set smaller so it fits the narrow frame */
+:root:not(.board) .demo-screen { gap: 10px; padding: 12px 14px 14px; }
+:root:not(.board) .demo-tag { font-size: 22px; }
+:root:not(.board) .dm-split { gap: 14px; }
+:root:not(.board) .dm-q { font-size: 28px; }
+:root:not(.board) .dm-opt { min-height: 46px; padding: 4px 10px; gap: 8px; font-size: 20px; }
+:root:not(.board) .dm-plain .dm-opt { font-size: 18px; }
+:root:not(.board) .dm-opt b { width: 30px; height: 30px; font-size: 17px; }
+:root:not(.board) .dm-para { padding: 10px 14px; font-size: 23px; line-height: 1.75; }
+:root:not(.board) .dm-btn { padding: 8px 34px; font-size: 21px; }
+:root:not(.board) .dm-pop img { width: 250px; height: 148px; }
+:root:not(.board) .dm-pop strong { font-size: 30px; }
 .dm-end span { font-size: 30px; font-weight: 700; color: var(--accent-ink); }
 
 /* Bangla reaction pop-up after each answer (like Science Fail). */
@@ -1557,13 +1649,13 @@ body:not(.ready) #home::after {
 .board .stat span { font-size: 16px; }
 
 /* ---------- Math ---------- */
-.board .shape-strip { grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 4px; } /* one row, so the demo fits below */
+.board .shape-strip { gap: 12px; margin-bottom: 4px; } /* one row, so the demo fits below */
 .board .shape-chip { padding: 10px 4px 8px; font-size: 17px; }
 .board .shape-chip .shape-icon { width: 44px; height: 44px; }
 /* Play screen: big "Draw a CIRCLE" on the left, the pad in the middle, the hint on the right. */
 .board .math-chips { display: flex; gap: 14px; }
-.board .tries-chip { background: #fff4e6; color: #c2410c; }
-.board .tries-chip.low { background: var(--bad-soft); color: var(--bad); }
+.tries-chip { background: #fff4e6; color: #c2410c; }
+.tries-chip.low { background: var(--bad-soft); color: var(--bad); }
 .board .math-stage { flex: 1 1 auto; min-height: 0; display: grid; grid-template-columns: 330px minmax(0, 1fr) 330px; align-items: center; gap: 24px; padding: 8px 48px 4px; }
 .board .math-stage .target { flex-direction: column; align-items: flex-start; gap: 18px; padding: 0; }
 .board .target-icon { width: 230px; height: 230px; padding: 26px; border-radius: 40px; }
@@ -1572,16 +1664,20 @@ body:not(.ready) #home::after {
 .board .math-stage .target-meta { max-width: none; font-size: 38px; line-height: 1.3; font-weight: 700; text-align: left; color: var(--accent-ink); }
 .board .pad-wrap { height: 100%; padding: 6px 0; }
 /* Clear and Skip: light, colourful buttons */
-.board .btn-clear { background: #e7f5ff; color: #1864ab; box-shadow: inset 0 0 0 2px #a5d8ff, 0 4px 0 #a5d8ff; }
-.board .btn-skip { background: #fff4e6; color: #c2410c; box-shadow: inset 0 0 0 2px #ffc078, 0 4px 0 #ffc078; }
+.btn-clear { background: #e7f5ff; color: #1864ab; box-shadow: inset 0 0 0 2px #a5d8ff, 0 4px 0 #a5d8ff; }
+.btn-skip { background: #fff4e6; color: #c2410c; box-shadow: inset 0 0 0 2px #ffc078, 0 4px 0 #ffc078; }
 .board .btn-clear, .board .btn-skip { font-size: 26px; font-weight: 700; }
 /* Start screen: each shape in its own colour */
-.board .shape-chip:nth-child(1) { background: #fff4e6; border-color: #ffc078; color: #c2410c; }
-.board .shape-chip:nth-child(1) .shape-icon { stroke: #e8590c; }
-.board .shape-chip:nth-child(2) { background: #e7f5ff; border-color: #a5d8ff; color: #1864ab; }
-.board .shape-chip:nth-child(2) .shape-icon { stroke: #1c7ed6; }
-.board .shape-chip:nth-child(3) { background: #f3f0ff; border-color: #d0bfff; color: #5f3dc4; }
-.board .shape-chip:nth-child(3) .shape-icon { stroke: #7048e8; }
+.shape-chip:nth-child(1) { background: #fff4e6; border-color: #ffc078; color: #c2410c; }
+.shape-chip:nth-child(1) .shape-icon { stroke: #e8590c; }
+.shape-chip:nth-child(2) { background: #e7f5ff; border-color: #a5d8ff; color: #1864ab; }
+.shape-chip:nth-child(2) .shape-icon { stroke: #1c7ed6; }
+.shape-chip:nth-child(3) { background: #f3f0ff; border-color: #d0bfff; color: #5f3dc4; }
+.shape-chip:nth-child(3) .shape-icon { stroke: #7048e8; }
+.shape-chip:nth-child(4) { background: #ebfbee; border-color: #8ce99a; color: #2b8a3e; }
+.shape-chip:nth-child(4) .shape-icon { stroke: #37b24d; }
+.shape-chip:nth-child(5) { background: #fff0f6; border-color: #fcc2d7; color: #c2255c; }
+.shape-chip:nth-child(5) .shape-icon { stroke: #e64980; }
 .board .shape-chip { border-width: 2px; font-size: 20px; font-weight: 700; }
 .board .pad-box { border-radius: 28px; background-size: 30px 30px; }
 .board .pad-hint { font-size: 22px; }
@@ -1626,6 +1722,32 @@ body:not(.ready) #home::after {
 .board .verify-out p { font-size: 20px; }
 
 /* =====================================================================
+   Phones turned sideways: too short for the games, so ask for upright
+   ===================================================================== */
+.rotate-hint { display: none; }
+@media (orientation: landscape) and (max-height: 500px) {
+  .rotate-hint {
+    position: fixed;
+    inset: 0;
+    z-index: 1000;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 14px;
+    padding: 24px;
+    background: var(--night-1);
+    color: #fff;
+    font-size: 22px;
+    font-weight: 700;
+    line-height: 1.5;
+    text-align: center;
+  }
+  .rotate-hint small { font-size: 15px; font-weight: 400; opacity: .75; }
+  .rotate-hint svg { width: 64px; height: 64px; animation: tilt 2s ease-in-out infinite; }
+}
+
+/* =====================================================================
    Animations
    ===================================================================== */
 @keyframes float { 0%, 100% { transform: translateY(0) rotate(-.5deg); } 50% { transform: translateY(-12px) rotate(.5deg); } }
@@ -1641,6 +1763,7 @@ body:not(.ready) #home::after {
 @keyframes fade-out { to { opacity: 0; } }
 @keyframes pulse { 50% { transform: scale(1.06); } }
 @keyframes blink { 50% { opacity: .25; } }
+@keyframes tilt { 0%, 100% { transform: rotate(-90deg); } 50% { transform: rotate(0); } }
 
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {

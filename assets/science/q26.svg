@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="900" height="600" viewBox="0 0 900 600">
+  <defs>
+    <g id="steam" fill="none" stroke="#fff" stroke-width="8" stroke-linecap="round" opacity=".9">
+      <path d="M-30 0q-12-16 0-32t0-34M0 -6q-12-16 0-32t0-34M30 0q-12-16 0-32t0-34"/>
+    </g>
+  </defs>
+  <rect width="900" height="600" fill="#6fb3b0"/>
+  <rect x="0" y="440" width="900" height="160" fill="#c98a4b"/>
+  <path d="M0 440h900" stroke="#2a2330" stroke-width="5"/>
+  <path d="M40 500h160M400 560h140M700 520h160" stroke="#a96d36" stroke-width="5" stroke-linecap="round"/>
+
+  <!-- left: hot tea in a tall cup -->
+  <path d="M190 210h160l-14 220H204z" fill="#fff" stroke="#2a2330" stroke-width="6" stroke-linejoin="round"/>
+  <ellipse cx="270" cy="212" rx="80" ry="14" fill="#b5651d" stroke="#2a2330" stroke-width="5"/>
+  <path d="M350 250q60 0 54 60t-62 56" fill="none" stroke="#2a2330" stroke-width="14" stroke-linecap="round"/>
+  <path d="M350 250q60 0 54 60t-62 56" fill="none" stroke="#fff" stroke-width="6" stroke-linecap="round"/>
+  <path d="M206 300h130" stroke="#e03131" stroke-width="10"/>
+  <ellipse cx="270" cy="440" rx="120" ry="16" fill="#fff" stroke="#2a2330" stroke-width="5"/>
+  <use href="#steam" x="270" y="180"/>
+
+  <!-- right: the same hot tea poured into a wide saucer -->
+  <ellipse cx="640" cy="420" rx="170" ry="40" fill="#fff" stroke="#2a2330" stroke-width="6"/>
+  <ellipse cx="640" cy="414" rx="134" ry="26" fill="#b5651d" stroke="#2a2330" stroke-width="5"/>
+  <path d="M560 408q30-8 60-6" fill="none" stroke="#e8a46a" stroke-width="5" stroke-linecap="round"/>
+  <use href="#steam" x="580" y="380"/>
+  <use href="#steam" x="700" y="380"/>
+</svg>
