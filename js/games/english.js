@@ -2,7 +2,6 @@
 import { h, haptic, icon, formatTime, shuffle } from '../lib/util.js';
 import { topBar, button, scoreRing, resultView } from '../lib/ui.js';
 import { showWinScreen } from '../lib/reward.js';
-import { countPlay, countWin } from '../lib/attempts.js';
 import { demoPlayer, demoClock } from '../lib/demo.js';
 
 // A word: letters/digits, with optional apostrophe parts (don't, Rafi's) and hyphen parts (well-known).
@@ -68,7 +67,6 @@ const DEFAULTS = { passAccuracy: 85, timeLimitSeconds: 0, randomStory: true };
 export function mount(root, ctx) {
   const data = ctx.content;
   const cfg = { ...DEFAULTS, ...(ctx.config.english || {}) };
-  const secret = ctx.config.math?.rewardCodeSecret || ctx.config.rewardCodeSecret || '';
   const levels = (data.levels || []).map((level, i) => ({ ...level, number: i + 1, parsed: parseLevel(level) }));
   const limit = Math.max(0, Number(cfg.timeLimitSeconds) || 0);
   let timer = 0;
@@ -146,7 +144,6 @@ export function mount(root, ctx) {
     teardown();
     chosen = first;
     const runLevels = [first];
-    countPlay('english');
     const run = { startedAt: Date.now(), results: [], over: false, levels: runLevels };
     run.total = runLevels.reduce((sum, l) => sum + l.parsed.total, 0);
     run.deadline = limit ? run.startedAt + limit * 1000 : 0;
@@ -296,10 +293,11 @@ export function mount(root, ctx) {
     if (ratio * 100 >= cfg.passAccuracy) {
       haptic('win');
       showWinScreen(root, {
-        secret,
-        device: countWin('english'),
-        labels: { title: data.winTitle || 'Verb Hunt Complete!' },
-        rows: [...(levels.length > 1 && !random ? rows : []), { label: 'Accuracy', value: pct(ratio), ok: true }, { label: 'Time', value: formatTime(seconds) }], // one story: its score is the accuracy
+        score: {
+          value: pct(ratio),
+          label: 'accuracy',
+          detail: `${run.results.reduce((sum, r) => sum + r.correct, 0)} of ${run.total} verbs found · ${formatTime(seconds)}`,
+        },
         onPlayAgain: again,
         onHome: ctx.goHome,
         track,

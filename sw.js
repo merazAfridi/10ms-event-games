@@ -11,7 +11,7 @@
  * If you add new files (e.g. a new cover image name), add them to PRECACHE.
  * Bump VERSION when you remove or rename files so old copies are cleaned up.
  */
-const VERSION = 'v84';
+const VERSION = 'v86';
 const CACHE = `book-of-games-${VERSION}`;
 
 const PRECACHE = [
@@ -27,7 +27,6 @@ const PRECACHE = [
   'js/lib/confetti.js',
   'js/lib/reward.js',
   'js/lib/sound.js',
-  'js/lib/attempts.js',
   'js/lib/demo.js',
   'js/lib/arcade.js',
   'js/games/bangla.js',
@@ -85,6 +84,7 @@ const PRECACHE = [
   'assets/bangla/react-yes.jpg',
   'assets/bangla/react-no.jpg',
   'assets/brand/10ms-logo-light.svg',
+  'assets/brand/congrats.jpg',
   'assets/sounds/page-flip.mp3',
   'assets/fonts/hind-siliguri-bengali-400-normal.woff2',
   'assets/fonts/hind-siliguri-bengali-600-normal.woff2',

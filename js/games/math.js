@@ -3,7 +3,6 @@ import { h, html, haptic, icon, formatTime, reducedMotion, shuffle } from '../li
 import { topBar, button, scoreRing, resultView } from '../lib/ui.js';
 import { scoreShape, polygonVertices } from '../lib/shape-score.js';
 import { showWinScreen } from '../lib/reward.js';
-import { countPlay, countWin } from '../lib/attempts.js';
 import { demoPlayer, demoClock } from '../lib/demo.js';
 
 const RESULT_PAUSE = 1500; // ms the accuracy stays on screen before moving on
@@ -73,7 +72,6 @@ export function mount(root, ctx) {
 
   function play() {
     teardown();
-    countPlay('math');
     // A new set of shapes in a new order every game, so nobody knows what comes next.
     shapes = cfg.shapesPerGame > 0 ? shuffle(pool).slice(0, perGame) : pool.slice();
     const st = {
@@ -408,7 +406,12 @@ export function mount(root, ctx) {
     function win() {
       stopPlay();
       haptic('win');
-      showWin();
+      const done = [...st.completed].map((i) => `${shapes[i].name} ${st.best.get(i)}%`);
+      showWin({
+        value: `${st.completed.size}/${need}`,
+        label: 'shapes completed',
+        detail: `${done.join(' · ')} · ${st.tries} ${st.tries === 1 ? 'try' : 'tries'}`,
+      });
     }
 
     function timeUp(reason) {
@@ -435,14 +438,9 @@ export function mount(root, ctx) {
     }
   }
 
-  function showWin() {
+  function showWin(score) {
     showWinScreen(root, {
-      secret: cfg.rewardCodeSecret,
-      device: countWin('math'),
-      labels: {
-        ...(data.winTitle && { title: data.winTitle }),
-        ...(data.winMessage && { message: data.winMessage }),
-      },
+      score,
       onPlayAgain: play,
       onHome: ctx.goHome,
       track: (fn) => cleanup.push(fn),

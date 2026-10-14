@@ -170,12 +170,12 @@ function goHome() {
 }
 
 // Leaving the browser (switching apps, turning the screen off, closing the tab) ends the game:
-// coming back shows the shelf again. A win screen is kept so the gift code can still be shown.
+// coming back shows the shelf again. A win screen is kept so it can still be shown at the gift desk.
 let quickClose = false;
 let hiddenAt = 0;
 
 function backToShelf() {
-  if (!current || current.id === 'verify' || gameEl.querySelector('.result.win')) return;
+  if (!current || current.id === 'verify' || gameEl.querySelector('.celebrate')) return;
   quickClose = true; // no close animation or sound for this
   goHome();
 }

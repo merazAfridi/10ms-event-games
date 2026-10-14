@@ -2,7 +2,6 @@
 import { h, html, toBn, shuffle, haptic, icon, formatTime, reducedMotion } from '../lib/util.js';
 import { topBar, button, scoreRing, resultView } from '../lib/ui.js';
 import { showWinScreen } from '../lib/reward.js';
-import { countPlay, countWin } from '../lib/attempts.js';
 import { demoPlayer, demoClock } from '../lib/demo.js';
 
 const LETTERS = ['ক', 'খ', 'গ', 'ঘ', 'ঙ', 'চ'];
@@ -36,7 +35,6 @@ const flask = (burnt) => `<svg class="flask ${burnt ? 'burnt' : 'calm'}" viewBox
 export function mount(root, ctx) {
   const data = ctx.content;
   const cfg = { ...DEFAULTS, ...(ctx.config.science || {}) };
-  const secret = ctx.config.math?.rewardCodeSecret || ctx.config.rewardCodeSecret || '';
   const all = (data.challenges || []).filter((c) => c && c.answer);
   const perGame = cfg.challengesPerGame > 0 ? Math.min(cfg.challengesPerGame, all.length) : all.length; // 0 = all of them
   const need = Math.max(1, Math.min(cfg.challengesToWin, perGame));
@@ -72,7 +70,6 @@ export function mount(root, ctx) {
   function play() {
     teardown();
     const order = (cfg.shuffleChallenges ? shuffle(all) : all.slice()).slice(0, perGame);
-    countPlay('science');
     const st = { i: 0, correct: 0, results: [], deadline: Date.now() + cfg.timeLimitSeconds * 1000, over: false, finished: false };
 
     const timerText = h('span', {}, bnTime(cfg.timeLimitSeconds));
@@ -152,7 +149,7 @@ export function mount(root, ctx) {
         answered = true;
         const ok = text === answer;
         st.results.push({ title: c.title, ok });
-        if (st.i + 1 >= order.length) st.finished = true; // last answer freezes the timer
+        if (st.i + 1 >= order.length) { st.finished = true; st.endedAt = Date.now(); } // last answer freezes the timer
         bar.style.width = `${((st.i + 1) / order.length) * 100}%`;
         for (const b of buttons) {
           b.disabled = true;
@@ -241,20 +238,16 @@ export function mount(root, ctx) {
       st.over = true;
       teardown();
       haptic('win');
+      const limit = cfg.timeLimitSeconds;
+      const used = Math.round(((st.endedAt || Date.now()) - (st.deadline - limit * 1000)) / 1000);
       showWinScreen(root, {
-        secret,
-        device: countWin('science'),
-        num: toBn,
+        score: {
+          value: `${toBn(st.correct)}/${toBn(order.length)}`,
+          label: 'সঠিক উত্তর',
+          detail: `সময় লেগেছে ${bnTime(Math.min(used, limit))}`,
+        },
         labels: {
-          plays: 'এই ডিভাইসে খেলা হয়েছে: {plays} বার',
-          wins: 'পুরস্কার জিতেছে: {wins} বার',
-          title: data.winTitle || 'চ্যালেঞ্জ সম্পন্ন!',
-          message: data.winMessage || 'সারপ্রাইজ পুরস্কার পেতে এই স্ক্রিনটি দেখাও!',
-          codeLabel: 'Gift code',
-          leaveTitle: 'স্টাফ কি কোডটি দেখেছেন?',
-          leaveText: 'এই স্ক্রিন থেকে বের হলে কোডটি আর দেখা যাবে না।',
-          leaveOk: 'হ্যাঁ, বের হব',
-          leaveCancel: 'এখানেই থাকব',
+          scoreLabel: 'তোমার স্কোর',
           playAgain: 'আবার খেলো',
           home: 'বইয়ে ফিরে যাও',
           back: BACK_LABEL,

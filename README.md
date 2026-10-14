@@ -24,7 +24,7 @@ It works on the smartboard and on phones. Hold the phone upright.
 
 ## How the rewards work
 
-When you win you see a "Challenge Completed!" screen with a gift code. If you don't win you see your score and you can play again.
+When you win, a big "Congratulations" screen opens with your score and gold confetti (tap for more). Show it at the gift desk. If you don't win you see your score and you can play again.
 
 | Game | To win |
 |---|---|
@@ -32,13 +32,6 @@ When you win you see a "Challenge Completed!" screen with a gift code. If you do
 | English | 85% on the story in 1:30 |
 | Math | 2 shapes in 1:30, max 7 tries |
 | Science | 5 out of 7 correct in 1:30 |
-
-### The gift code
-
-A gift code looks like `1432-7KQX3`.
-
-- `1432` is the time you won (2:32 PM).
-- `7KQX3` is a check part. It stops people from making up fake codes.
 
 ## Built with
 

@@ -2,7 +2,6 @@
 import { h, toBn, shuffle, haptic, icon, formatTime, reducedMotion } from '../lib/util.js';
 import { topBar, button, scoreRing, resultView } from '../lib/ui.js';
 import { showWinScreen } from '../lib/reward.js';
-import { countPlay, countWin } from '../lib/attempts.js';
 import { demoPlayer, demoClock } from '../lib/demo.js';
 
 const LETTERS = ['ক', 'খ', 'গ', 'ঘ', 'ঙ', 'চ'];
@@ -35,7 +34,6 @@ function pickMixed(list, n) {
 export function mount(root, ctx) {
   const data = ctx.content;
   const cfg = { ...DEFAULTS, ...(ctx.config.bangla || {}) };
-  const secret = ctx.config.math?.rewardCodeSecret || ctx.config.rewardCodeSecret || '';
   const all = (data.challenges || []).filter((c) => c && c.answer);
   all.forEach((c) => [c.image, ...(c.pictureOptions ? c.options : [])].forEach((src) => { if (src) new Image().src = src; }));
   Object.values(REACTION).forEach((src) => { new Image().src = src; });
@@ -75,7 +73,6 @@ export function mount(root, ctx) {
 
   function start() {
     teardown();
-    countPlay('bangla');
     const order = cfg.shuffleChallenges ? pickMixed(shuffle(all), total) : all.slice(0, total);
     state = { order, index: 0, score: 0, picks: [], deadline: Date.now() + limit * 1000, finished: false };
     // One clock for the whole game, top right; it stops once the last question is answered.
@@ -159,7 +156,7 @@ export function mount(root, ctx) {
     function pick(text, chosen) {
       if (answered || state.finished) return;
       answered = true;
-      if (isLast) state.finished = true; // freezes the clock
+      if (isLast) { state.finished = true; state.endedAt = Date.now(); } // freezes the clock
       const correct = text === answer;
       if (correct) state.score += 1;
       state.picks.push({ correct, picked: text });
@@ -226,20 +223,15 @@ export function mount(root, ctx) {
   function win() {
     teardown();
     haptic('win');
+    const used = Math.round(((state.endedAt || Date.now()) - (state.deadline - limit * 1000)) / 1000);
     showWinScreen(root, {
-      secret,
-      device: countWin('bangla'),
-      num: toBn,
+      score: {
+        value: `${toBn(state.score)}/${toBn(total)}`,
+        label: 'সঠিক উত্তর',
+        detail: limit ? `সময় লেগেছে ${bnTime(Math.min(used, limit))}` : '',
+      },
       labels: {
-        plays: 'এই ডিভাইসে খেলা হয়েছে: {plays} বার',
-        wins: 'পুরস্কার জিতেছে: {wins} বার',
-        title: data.winTitle || 'চ্যালেঞ্জ সম্পন্ন!',
-        message: data.winMessage || 'সারপ্রাইজ পুরস্কার পেতে এই স্ক্রিনটি দেখাও!',
-        codeLabel: 'Gift code',
-        leaveTitle: 'স্টাফ কি কোডটি দেখেছেন?',
-        leaveText: 'এই স্ক্রিন থেকে বের হলে কোডটি আর দেখা যাবে না।',
-        leaveOk: 'হ্যাঁ, বের হব',
-        leaveCancel: 'এখানেই থাকব',
+        scoreLabel: 'তোমার স্কোর',
         playAgain: 'আবার খেলো',
         home: 'বইয়ে ফিরে যাও',
         back: BACK_LABEL,

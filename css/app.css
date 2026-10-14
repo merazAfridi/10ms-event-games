@@ -1060,42 +1060,143 @@ body:not(.ready) #home::after {
 .pop.small .pop-text { color: #a87400; }
 
 .confetti { position: absolute; inset: 0; z-index: 0; width: 100%; height: 100%; pointer-events: none; }
-.win { z-index: 1; background: transparent; }
-.trophy { width: 124px; height: 124px; animation: pop-in .7s cubic-bezier(.2, 1.4, .4, 1); }
-.code-card {
-  margin-top: 20px;
-  padding: 18px 16px 16px;
-  border-radius: 24px;
-  background: linear-gradient(160deg, var(--accent-ink), var(--accent));
-  color: #fff;
-  box-shadow: 0 16px 34px rgba(30, 20, 30, .3);
+
+/* ---------- Win screen: a full-screen "Congratulations" celebration with the score ---------- */
+.btn.btn-celebrate {
+  background: linear-gradient(180deg, #ffe08a 0%, #f6c453 45%, #d99a1e 100%);
+  color: #5a1d06;
+  font-weight: 800;
+  box-shadow: 0 4px 0 #a86a0c, 0 10px 24px rgba(214, 150, 30, .45);
 }
-.code-card p { margin: 0; }
-.code-label { font: 700 13px/1 var(--display); letter-spacing: .24em; text-transform: uppercase; color: var(--gold); }
-.code { margin: 12px 0 8px !important; font: 700 clamp(34px, 11vw, 46px)/1.1 var(--mono); letter-spacing: .06em; }
-.code-meta { font-size: 15px; opacity: .85; }
-.live {
-  display: inline-flex;
+.btn.btn-celebrate:active { transform: translateY(3px); box-shadow: 0 1px 0 #a86a0c; }
+
+.celebrate {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  background: #1a0402;
+  container-type: size;
+  animation: fade-in .35s ease-out both;
+}
+/* Phones: a blurred, darkened copy of the picture fills the whole screen behind it. */
+.celebrate-bg {
+  position: absolute;
+  inset: -40px;
+  width: calc(100% + 80px);
+  height: calc(100% + 80px);
+  object-fit: cover;
+  filter: blur(18px) brightness(.5) saturate(1.2);
+}
+.celebrate-body {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
   align-items: center;
-  gap: 8px;
-  margin-top: 12px !important;
-  padding: 5px 12px;
-  border-radius: 99px;
-  background: rgba(255, 255, 255, .13);
-  font-size: 14px;
-  font-weight: 600;
-  font-variant-numeric: tabular-nums;
+  justify-content: center;
+  padding: calc(64px + var(--safe-t)) 0 calc(16px + var(--safe-b));
+  overflow-x: hidden;
+  overflow-y: auto;
 }
-.live-dot { width: 9px; height: 9px; border-radius: 50%; background: #ff5a5f; animation: blink 1.2s infinite; }
-/* plays / wins on this phone - turns amber when the phone already won before */
-.device-count {
-  margin-top: 12px !important;
-  padding-top: 10px;
-  border-top: 1px solid rgba(255, 255, 255, .2);
-  font-size: 14px;
-  font-weight: 600;
+.celebrate .confetti { z-index: 2; }
+.celebrate-frame {
+  position: relative;
+  flex: none;
+  width: 100%;
+  animation: celebrate-in .7s cubic-bezier(.2, 1.3, .4, 1) both;
 }
-.device-count.repeat { color: #ffd166; }
+.celebrate-img { display: block; width: 100%; height: auto; box-shadow: 0 0 60px rgba(0, 0, 0, .5); }
+/* Phones: the score and the buttons sit below the picture, at a readable size. */
+.celebrate-score {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: max-content;
+  max-width: calc(100% - 32px);
+  margin: 18px auto 0;
+  padding: 12px 30px 14px;
+  border: 3px solid #f6c453;
+  border-radius: 22px;
+  background: linear-gradient(180deg, rgba(70, 10, 4, .9), rgba(30, 4, 2, .92));
+  box-shadow: 0 0 0 4px rgba(246, 196, 83, .18), 0 0 40px rgba(246, 196, 83, .45);
+  color: #fff3cf;
+  text-align: center;
+  animation: pop-in .5s .45s cubic-bezier(.2, 1.4, .4, 1) both;
+}
+.cs-label { font: 700 15px/1.3 var(--font); letter-spacing: .04em; color: #ffd98a; }
+.cs-value {
+  font: 700 60px/1.1 var(--display);
+  background: linear-gradient(180deg, #fffbe6 0%, #ffd34e 50%, #d08a12 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  filter: drop-shadow(0 3px 0 #7a2d05);
+}
+.cs-sub { font: 700 18px/1.3 var(--font); }
+.cs-detail { margin-top: 4px; font: 500 14px/1.4 var(--font); color: rgba(255, 243, 207, .8); }
+.celebrate-actions {
+  position: relative;
+  z-index: 3;
+  display: grid;
+  gap: 10px;
+  width: min(calc(100% - 32px), 420px);
+  margin: 20px auto 0;
+  animation: rise .5s .7s ease-out both;
+}
+.celebrate-back {
+  position: absolute;
+  top: calc(10px + var(--safe-t));
+  left: 10px;
+  z-index: 3;
+  background: rgba(0, 0, 0, .4);
+  color: #fff;
+  box-shadow: inset 0 0 0 2px rgba(255, 243, 207, .45);
+}
+/* Big screens: the picture covers the whole screen (a little is cut off at the edges if the
+   screen's shape differs); the score sits on the carpet under "Congratulations", the
+   buttons on the carpet in front of the medal. Positions are % of the picture. */
+.board .celebrate-bg { display: none; }
+.board .celebrate-body { display: block; padding: 0; overflow: hidden; }
+.board .celebrate-frame {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: max(100cqw, 177.6cqh);
+  aspect-ratio: 1620 / 912;
+  translate: -50% -50%;
+  container-type: inline-size;
+}
+.board .celebrate-img { height: 100%; object-fit: cover; box-shadow: none; }
+.board .celebrate-score {
+  position: absolute;
+  left: 34%;
+  top: 64%;
+  margin: 0;
+  padding: 1cqi 3cqi 1.2cqi;
+  border-width: .25cqi;
+  border-radius: 1.8cqi;
+  translate: -50% 0;
+}
+.board .cs-label { font-size: 1.5cqi; }
+.board .cs-value { font-size: 5.6cqi; filter: drop-shadow(0 .25cqi 0 #7a2d05); }
+.board .cs-sub { font-size: 1.7cqi; }
+.board .cs-detail { font-size: 1.3cqi; }
+.board .celebrate-actions {
+  position: absolute;
+  left: 51%;
+  right: 11%;
+  top: 80%;
+  width: auto;
+  margin: 0;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.2cqi;
+}
+.board .celebrate-actions .btn { min-height: 4.6cqi; font-size: 1.6cqi; border-radius: 1.3cqi; }
+.board .celebrate-actions .btn svg { width: 1.8cqi; height: 1.8cqi; }
+.board .celebrate-back { top: 20px; left: 20px; }
+@keyframes celebrate-in { from { opacity: 0; transform: scale(.85); } to { opacity: 1; transform: none; } }
 
 /* =====================================================================
    SCIENCE – Science Challenge
@@ -1699,19 +1800,6 @@ body:not(.ready) #home::after {
 .board .rv-answer { font-size: 21px; }
 .board .best-list li { min-height: 62px; padding: 10px 20px; font-size: 20px; }
 .board .result-actions { grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 28px; }
-.board .win { --col: 780px; padding-top: 12px; padding-bottom: 20px; } /* one column, like on a phone */
-.board .win .result-head { padding-bottom: 0; }
-.board .win .best-list { grid-template-columns: repeat(auto-fit, minmax(0, 1fr)); margin-top: 18px; }
-.board .win .best-list li { flex-direction: column; justify-content: center; gap: 2px; min-height: 0; padding: 8px 12px; text-align: center; }
-.board .win .result-actions { margin-top: 18px; }
-.board .trophy { width: 100px; height: 100px; }
-.board .code-card { margin-top: 18px; padding: 20px 24px 16px; }
-.board .code-label { font-size: 15px; }
-.board .code { font-size: 64px; }
-.board .code-meta { font-size: 18px; }
-.board .live { padding: 6px 16px; font-size: 17px; }
-.board .device-count { font-size: 17px; }
-.board .device-count.repeat { color: inherit; } /* many players share one board, so a repeat win is normal */
 
 .board .sheet-backdrop { align-items: center; justify-content: center; }
 .board .sheet { width: min(640px, calc(100% - 80px)); padding: 32px; border-radius: 28px; }
